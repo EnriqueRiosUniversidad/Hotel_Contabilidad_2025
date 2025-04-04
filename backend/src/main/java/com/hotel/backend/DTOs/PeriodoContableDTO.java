@@ -1,18 +1,16 @@
-package com.hotel.backend.entities;
+package com.hotel.backend.DTOs;
+
+import com.hotel.backend.entities.EstadoPeriodo;
 import jakarta.persistence.*;
 import lombok.Data;
 
-@Entity
-@Table(name = "periodos_contables")
 @Data
-public class PeriodoContable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer periodoId;
+public class PeriodoContableDTO {
+
     private Integer anio;
     private Integer mesInicio;
     private Integer mesFin;
-
     @Enumerated(EnumType.STRING)
     private EstadoPeriodo estado;
+
 }

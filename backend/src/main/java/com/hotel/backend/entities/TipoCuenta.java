@@ -1,6 +1,6 @@
 package com.hotel.backend.entities;
 
 
-enum TipoCuenta {
+public enum TipoCuenta {
     ACTIVO, PASIVO, PATRIMONIO, INGRESO, EGRESO
 }

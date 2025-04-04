@@ -1,9 +1,12 @@
 package com.hotel.backend.entities;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "detalles_asientos_provisionales")
+@Data
 public class DetalleAsientoProvisional {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

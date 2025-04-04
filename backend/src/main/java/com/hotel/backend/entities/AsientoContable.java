@@ -1,9 +1,12 @@
 package com.hotel.backend.entities;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.util.Date;
 
 @Entity
 @Table(name = "asientos_contables")
+@Data
 public class AsientoContable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

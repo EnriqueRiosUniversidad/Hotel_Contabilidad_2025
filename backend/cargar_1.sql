@@ -7,12 +7,12 @@ VALUES ('admin', 'admin@example.com', 'hashed_password', 1),
        ('user1', 'user1@example.com', 'hashed_password', 2);
 
 -- Insertar cuentas contables
-INSERT INTO cuentas_contables (codigo, nombre, tipo, nivel, cuenta_padre_id) 
-VALUES ('1001', 'Caja General', 'ACTIVO', 1, NULL),
-       ('2001', 'Proveedores', 'PASIVO', 1, NULL),
-       ('3001', 'Capital', 'PATRIMONIO', 1, NULL),
-       ('4001', 'Ventas', 'INGRESO', 1, NULL),
-       ('5001', 'Gastos Generales', 'EGRESO', 1, NULL);
+INSERT INTO cuentas_contables (codigo, nombre, tipo, nivel, cuenta_padre_id, periodo_contable_id) 
+VALUES ('1001', 'Caja General', 'ACTIVO', 1, NULL,1),
+       ('2001', 'Proveedores', 'PASIVO', 1, NULL,1),
+       ('3001', 'Capital', 'PATRIMONIO', 1, NULL,1),
+       ('4001', 'Ventas', 'INGRESO', 1, NULL,1),
+       ('5001', 'Gastos Generales', 'EGRESO', 1, NULL,1);
 
 -- Insertar períodos contables
 INSERT INTO periodos_contables (anio, mes_inicio, mes_fin, estado) 

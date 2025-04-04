@@ -1,5 +1,5 @@
 package com.hotel.backend.entities;
 
-enum EstadoPeriodo {
-    ABIERTO, CERRADO
+public enum EstadoPeriodo {
+    EDITABLE, INICIADO, FINALIZADO;
 }
