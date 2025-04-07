@@ -4,10 +4,13 @@ import com.hotel.backend.DTOs.CuentaContableDTO;
 import com.hotel.backend.services.Cuenta_Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@EnableMethodSecurity
 @RestController
 @RequestMapping("/plancuentas")
 @RequiredArgsConstructor
@@ -43,6 +46,7 @@ public class PlanDeCuentas_Controller {
         return ResponseEntity.ok(dtos);
     }
 
+    @PreAuthorize("hasRole('CONTADOR')")
     @PostMapping("/cuenta")
     public ResponseEntity<CuentaContableDTO> crearCuenta(@RequestBody CuentaContableDTO dto) {
         CuentaContableDTO cuentaCreada = cuentaService.crearCuenta(dto);
@@ -51,6 +55,7 @@ public class PlanDeCuentas_Controller {
 
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('CONTADOR')")
     public ResponseEntity<CuentaContableDTO> actualizarCuenta(
             @PathVariable Long id,
             @RequestBody CuentaContableDTO dto) {
@@ -59,6 +64,7 @@ public class PlanDeCuentas_Controller {
 
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('CONTADOR')")
     public ResponseEntity<Void> eliminarCuenta(@PathVariable Long id) {
         cuentaService.eliminarCuenta(id);
         return ResponseEntity.noContent().build(); // Retorna 204 No Content
