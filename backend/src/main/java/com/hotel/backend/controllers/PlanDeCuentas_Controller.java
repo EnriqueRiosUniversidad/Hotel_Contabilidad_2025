@@ -30,7 +30,6 @@ public class PlanDeCuentas_Controller {
         CuentaContableDTO dto = cuentaService.getByCodigoCuenta(codigo, periodoId);
         return ResponseEntity.ok(dto);
     }
-fffffffffffffffff
 
     @GetMapping("/")
     public  ResponseEntity<List<CuentaContableDTO>> getCuentas(){
