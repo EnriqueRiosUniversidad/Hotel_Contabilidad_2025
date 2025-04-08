@@ -8,27 +8,27 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-  
-    const payload = {
-      identifier,
-      password,
-    };
-  
-    console.log("Enviando login con:", payload); // 👀 Verifica lo que se manda
-  
-    try {
-      const res = await api.post('/auth/login', payload);
-      console.log("Respuesta del servidor:", res.data); // 👀
-      localStorage.setItem('token', res.data.token);
-      navigate('/home');
-    } catch (error) {
-      console.error("Error al hacer login:", error.response?.data || error.message);
-      alert('Usuario o contraseña incorrectos');
-    }
+ const handleLogin = async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    identifier,
+    password,
   };
-  
+
+  console.log("Enviando login con:", payload); // 👀 Verifica lo que se manda
+
+  try {
+    const res = await api.post('/auth/login', payload);
+    console.log("Respuesta del servidor:", res.data); // 👀
+    localStorage.setItem('token', res.data.token);
+    navigate('/home');
+  } catch (error) {
+    console.error("Error al hacer login:", error.response?.data || error.message);
+    alert('Usuario o contraseña incorrectos');
+  }
+};
+
 
   return (
     <div className="flex h-screen">
