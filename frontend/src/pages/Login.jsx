@@ -1,3 +1,5 @@
+// src/pages/Login.jsx
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveToken } from '../utils/auth';
@@ -16,16 +18,11 @@ function Login() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier, password }),
       });
-  
+
       if (!res.ok) throw new Error('Credenciales inválidas');
-  
+
       const data = await res.json();
       saveToken(data.token);
-
-      console.log('Login exitoso, redirigiendo a /');
-navigate('/');
-
-
       navigate('/');
     } catch (err) {
       alert(err.message);
