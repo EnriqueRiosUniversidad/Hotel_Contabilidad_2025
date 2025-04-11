@@ -6,9 +6,10 @@ function Login() {
   const handleLogin = () => {
     navigate("/home");
   };
+
   return (
     <div className="flex h-screen font-poppins overflow-hidden">
-      {/* Imagen izquierda */}
+      {/* Imagen lado izquierdo */}
       <div className="w-1/2 h-full">
         <img
           src="/login-image.jpg"
@@ -19,44 +20,44 @@ function Login() {
 
       {/* Formulario lado derecho */}
       <div className="w-1/2 bg-[#A3F7B5] flex items-center justify-center">
-        <div className="bg-white rounded-xl p-10 shadow-lg w-[400px]">
+        <div className="bg-[#C5F8C7] border border-gray-300 rounded-xl px-10 py-8 shadow-2xl w-[380px]">
           {/* Logo */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4">
             <img src="/logo.png" alt="Logo" className="w-20 h-20 object-contain" />
           </div>
 
           {/* Título */}
-          <h2 className="text-3xl font-bold text-center text-black mb-8">
+          <h2 className="text-3xl font-bold text-center text-black mb-6 italic">
             Bienvenido
           </h2>
 
-          {/* Usuario */}
-          <div className="mb-5">
-            <label className="block text-gray-800 font-medium mb-1">Usuario:</label>
+          {/* Campo Usuario */}
+          <div className="mb-4">
+            <label className="block text-black font-medium mb-1">Usuario:</label>
             <input
               type="text"
               placeholder="Ingrese su usuario"
-              className="input input-bordered w-full bg-white text-black"
+              className="input input-bordered w-full rounded-lg bg-white text-black"
             />
           </div>
 
-          {/* Contraseña */}
+          {/* Campo Contraseña */}
           <div className="mb-6">
-            <label className="block text-gray-800 font-medium mb-1">Contraseña:</label>
+            <label className="block text-black font-medium mb-1">Contraseña:</label>
             <input
               type="password"
               placeholder="Ingrese su contraseña"
-              className="input input-bordered w-full bg-white text-black"
+              className="input input-bordered w-full rounded-lg bg-white text-black"
             />
           </div>
 
           {/* Botón */}
           <button
-      className="btn w-full bg-green-600 text-white hover:bg-green-700 rounded-lg shadow"
-      onClick={handleLogin}
-    >
-      Ingresar
-    </button>
+            onClick={handleLogin}
+            className="btn w-full bg-green-600 text-white hover:bg-green-700 rounded-full transition-all duration-200 shadow"
+          >
+            Ingresar
+          </button>
         </div>
       </div>
     </div>
