@@ -1,75 +1,53 @@
-// src/pages/Login.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import { saveToken } from '../utils/auth';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Login = () => {
+function Login() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
- const handleLogin = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('https://hotel-contabilidad-35ebeef89ac8.herokuapp.com/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password }),
+      });
+  
+      if (!res.ok) throw new Error('Credenciales inválidas');
+  
+      const data = await res.json();
+      saveToken(data.token);
 
-  const payload = {
-    identifier,
-    password,
+      console.log('Login exitoso, redirigiendo a /');
+navigate('/');
+
+
+      navigate('/');
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
-  console.log("Enviando login con:", payload); // 👀 Verifica lo que se manda
-
-  try {
-    const res = await api.post('/auth/login', payload);
-    console.log("Respuesta del servidor:", res.data); // 👀
-    localStorage.setItem('token', res.data.token);
-    navigate('/home');
-  } catch (error) {
-    console.error("Error al hacer login:", error.response?.data || error.message);
-    alert('Usuario o contraseña incorrectos');
-  }
-};
-
-
   return (
-    <div className="flex h-screen">
-  {/* Imagen */}
-  <div
-    className="w-1/2 bg-cover bg-center"
-    style={{ backgroundImage: 'url(/tu-imagen.jpg)' }}
-  ></div>
-
-  {/* Formulario */}
-  <div className="w-1/2 flex flex-col items-center justify-center p-10" style={{ backgroundColor: '#ACF29F' }}>
-    <img src="/logo.png" className="w-40 mb-4" />
-    <h2 className="text-2xl font-bold mb-4 text-[#2E473D] text-center">Bienvenido</h2>
-
-    <form onSubmit={handleLogin} className="w-full max-w-sm">
-      <input
-        type="text"
-        placeholder="Usuario"
-        value={identifier}
-        onChange={(e) => setIdentifier(e.target.value)}
-        className="input input-bordered w-full mb-4 bg-[#F4FFF0] text-[#2E473D] border-[#7DC57C]"
-      />
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="input input-bordered w-full mb-4 bg-[#F4FFF0] text-[#2E473D] border-[#7DC57C]"
-      />
-      <button
-        type="submit"
-        className="btn w-full"
-        style={{ backgroundColor: '#7DC57C', color: '#fff', border: 'none' }}
-      >
-        Ingresar
-      </button>
-    </form>
-  </div>
-</div>
-
+    <div className="container d-flex vh-100 justify-content-center align-items-center" style={{ backgroundColor: '#a8e6cf' }}>
+      <form className="bg-white p-4 rounded shadow" onSubmit={handleSubmit}>
+        <h2 className="text-center mb-4">Iniciar Sesión</h2>
+        <div className="mb-3">
+          <label>Email</label>
+          <input type="email" className="form-control" value={identifier} onChange={e => setIdentifier(e.target.value)} required />
+        </div>
+        <div className="mb-3">
+          <label>Contraseña</label>
+          <input type="password" className="form-control" value={password} onChange={e => setPassword(e.target.value)} required />
+        </div>
+        <button className="btn btn-success w-100" type="submit">Entrar</button>
+      </form>
+    </div>
   );
-};
+}
 
 export default Login;

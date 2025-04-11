@@ -1,10 +1,15 @@
-// src/pages/Home.jsx
-const Home = () => {
+import Navbar from '../components/Navbar';
+
+function Home() {
   return (
-    <div className="flex items-center justify-center h-screen bg-green-100">
-      <h1 className="text-3xl font-bold">¡Bienvenido al Home!</h1>
+    <div className="d-flex">
+      <Navbar />
+      <div className="flex-grow-1 p-4">
+        <h1>Bienvenido al Sistema Contable</h1>
+        <p>Aquí puedes gestionar tus libros, balances y más.</p>
+      </div>
     </div>
   );
-};
+}
 
 export default Home;

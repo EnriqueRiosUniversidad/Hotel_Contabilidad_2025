@@ -1,18 +1,12 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
-import Home from './pages/Home';
+import { BrowserRouter as Router } from 'react-router-dom';
+import AppRoutes from './routes/AppRoutes';
 
-const App = () => {
-  const token = localStorage.getItem('token');
-
+function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/home" element={token ? <Home /> : <Navigate to="/" />} />
-      </Routes>
+      <AppRoutes />
     </Router>
   );
-};
+}
 
 export default App;
