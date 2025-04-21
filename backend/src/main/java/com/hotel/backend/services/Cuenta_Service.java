@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -120,9 +121,17 @@ public class Cuenta_Service {
                 .orElseThrow(() -> new EntityNotFoundException("Cuenta contable no encontrada"));
 
         if (cuenta.getPeriodoContable().getEstado() != EstadoPeriodo.EDITABLE) {
-            throw new IllegalStateException("No se puede eliminar la cuenta, el período no está en estado EDITABLE.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El período no está en estado EDITABLE.");
         }
 
-        cuentasContables_Repository.delete(cuenta);
+        try {
+            cuentasContables_Repository.delete(cuenta);
+        } catch (DataIntegrityViolationException e) {
+            // Captura exacta del error de FK (relaciones hijas o movimientos)
+            String mensaje = String.format("❌ La cuenta \"%s\" del período %d tiene subcuentas o asientos asociados y no puede eliminarse.", codigo, periodoId);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, mensaje);
+        }
     }
+
+
 }
