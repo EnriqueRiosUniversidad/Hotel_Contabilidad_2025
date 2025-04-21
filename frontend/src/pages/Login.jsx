@@ -1,8 +1,7 @@
-// src/pages/Login.jsx
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveToken } from '../utils/auth';
+import config from '../config';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Login() {
@@ -13,7 +12,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('https://hotel-contabilidad-35ebeef89ac8.herokuapp.com/auth/login', {
+      const res = await fetch(`${config.apiBaseUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identifier, password }),

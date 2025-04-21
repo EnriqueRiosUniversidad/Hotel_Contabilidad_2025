@@ -1,17 +1,21 @@
-package com.hotel.backend.entities;
-import jakarta.persistence.*;
-import jakarta.persistence.*;
-import lombok.Data;
+    package com.hotel.backend.entities;
 
-@Entity
-@Table(name = "cuentas_contables")
-@Data
+    import jakarta.persistence.*;
+    import lombok.*;
+
+    @Entity
+    @Table(name = "cuentas_contables")
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     public class CuentaContable {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Integer cuentaId;
 
-        private String codigo;
+        @EmbeddedId
+        @EqualsAndHashCode.Include
+        private CuentaContableId id;
+
         private String nombre;
 
         @Enumerated(EnumType.STRING)
@@ -20,12 +24,14 @@ import lombok.Data;
         private Integer nivel;
 
         @ManyToOne
-        @JoinColumn(name = "cuenta_padre_id")
+        @JoinColumns({
+                @JoinColumn(name = "cuenta_padre_codigo", referencedColumnName = "codigo"),
+                @JoinColumn(name = "cuenta_padre_periodo_contable_id", referencedColumnName = "periodo_contable_id")
+        })
         private CuentaContable cuentaPadre;
 
-        @ManyToOne
-        @JoinColumn(name = "periodo_contable_id", nullable = false)
+        @MapsId("periodoContableId")
+        @ManyToOne(optional = false)
+        @JoinColumn(name = "periodo_contable_id")
         private PeriodoContable periodoContable;
-
-
     }

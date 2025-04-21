@@ -17,7 +17,10 @@ public class DetalleAsiento {
     private AsientoContable asiento;
 
     @ManyToOne
-    @JoinColumn(name = "cuenta_id")
+    @JoinColumns({
+            @JoinColumn(name = "cuenta_codigo", referencedColumnName = "codigo"),
+            @JoinColumn(name = "cuenta_periodo_contable_id", referencedColumnName = "periodo_contable_id")
+    })
     private CuentaContable cuenta;
 
     private BigDecimal debe;
