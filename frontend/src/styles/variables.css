@@ -1,0 +1,20 @@
+:root {
+    --verde-claro: #a8e6cf;
+    --verde-menta: #dcedc1;
+    --verde-agua: #81c784;
+    --verde-bosque: #388e3c;
+    --texto-principal: #2e2e2e;
+    --fondo-gris-claro: #f8f9fa;
+    --blanco: #ffffff;
+    --rojo-bootstrap: #dc3545;
+    --verde-bootstrap: #198754;
+  }
+  
+  .bg-verde-claro {
+    background-color: var(--verde-claro) !important;
+  }
+  
+  .texto-principal {
+    color: var(--texto-principal) !important;
+  }
+  

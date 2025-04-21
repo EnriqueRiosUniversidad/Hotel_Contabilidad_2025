@@ -1,4 +1,5 @@
 package com.hotel.backend.entities;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import java.util.Date;
 @Table(name = "asientos_generados")
 @Data
 public class AsientoGenerado {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer asientoGeneradoId;
@@ -19,6 +21,10 @@ public class AsientoGenerado {
     @ManyToOne
     @JoinColumn(name = "asiento_id", nullable = true)
     private AsientoContable asiento;
+
+    @ManyToOne
+    @JoinColumn(name = "periodo_id", nullable = false)
+    private PeriodoContable periodo;
 
     private Date fechaGeneracion;
 

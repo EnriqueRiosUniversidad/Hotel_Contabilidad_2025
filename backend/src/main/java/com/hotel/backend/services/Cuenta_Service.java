@@ -1,16 +1,18 @@
 package com.hotel.backend.services;
 
 import com.hotel.backend.DTOs.CuentaContableDTO;
-import com.hotel.backend.entities.CuentaContable;
-import com.hotel.backend.entities.EstadoPeriodo;
-import com.hotel.backend.entities.PeriodoContable;
+import com.hotel.backend.entities.*;
 import com.hotel.backend.repository.CuentasContables_Repository;
 import com.hotel.backend.repository.PeriodoContable_Repository;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,127 +20,118 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class Cuenta_Service {
+
     private final CuentasContables_Repository cuentasContables_Repository;
     private final PeriodoContable_Repository periodoContable_Repository;
-    private final ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper mapper = new ModelMapper();
 
-
+    @PostConstruct
+    public void configurarMapper() {
+        this.mapper.typeMap(CuentaContable.class, CuentaContableDTO.class).addMappings(mapper -> {
+            mapper.map(src -> src.getId().getCodigo(), CuentaContableDTO::setCodigo);
+            mapper.map(src -> {
+                CuentaContable padre = src.getCuentaPadre();
+                return padre != null ? padre.getId().getCodigo() : null;
+            }, CuentaContableDTO::setCuentaPadreId);
+            mapper.map(src -> {
+                CuentaContable padre = src.getCuentaPadre();
+                return padre != null ? padre.getId().getPeriodoContableId() : null;
+            }, CuentaContableDTO::setCuentaPadrePeriodoId);
+            mapper.map(src -> src.getPeriodoContable().getPeriodoId(), CuentaContableDTO::setPeriodoContableId);
+        });
+    }
 
     @Transactional
-    public CuentaContableDTO getByIdCuenta(Long id) {
-        CuentaContable cuentaEntity =  cuentasContables_Repository.getById(id);
-        CuentaContableDTO dto = modelMapper.map(cuentaEntity, CuentaContableDTO.class);
-        return dto;
+    public CuentaContableDTO getByIdCuenta(String codigo, Integer periodoId) {
+        CuentaContable cuentaEntity = cuentasContables_Repository
+                .findById(new CuentaContableId(codigo, periodoId))
+                .orElseThrow(() -> new EntityNotFoundException("Cuenta contable no encontrada."));
+        return mapper.map(cuentaEntity, CuentaContableDTO.class);
     }
 
     @Transactional
     public CuentaContableDTO getByCodigoCuenta(String codigo, Long periodoId) {
         CuentaContable cuentaEntity = cuentasContables_Repository
-                .findByCodigoAndPeriodoContable_PeriodoId(codigo, periodoId)
+                .findById_CodigoAndId_PeriodoContableId(codigo, periodoId.intValue())
                 .orElseThrow(() -> new IllegalArgumentException("Cuenta no encontrada para el período especificado"));
-
-        return modelMapper.map(cuentaEntity, CuentaContableDTO.class);
+        return mapper.map(cuentaEntity, CuentaContableDTO.class);
     }
-
 
     @Transactional
     public List<CuentaContableDTO> getCuentas() {
-        List<CuentaContable> cuentasEntity = cuentasContables_Repository.findAll();
-
-        return cuentasEntity.stream()
-                .map(cuenta -> modelMapper.map(cuenta, CuentaContableDTO.class))
+        return cuentasContables_Repository.findAll()
+                .stream()
+                .map(cuenta -> mapper.map(cuenta, CuentaContableDTO.class))
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public List<CuentaContableDTO> getByPlan(Long periodoContableId) {
+    public List<CuentaContableDTO> getByPlan(Integer periodoContableId) {
         List<CuentaContable> cuentas = cuentasContables_Repository.findByPeriodoContable_PeriodoId(periodoContableId);
         return cuentas.stream()
-                .map(c -> modelMapper.map(c, CuentaContableDTO.class))
-                .toList();
+                .map(c -> mapper.map(c, CuentaContableDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public CuentaContableDTO crearCuenta(CuentaContableDTO dto) {
+        CuentaContableId idCuenta = new CuentaContableId(dto.getCodigo(), dto.getPeriodoContableId());
 
-        // Buscar el período contable por el ID recibido en el DTO.
+        // 1. Verificar si ya existe una cuenta con ese código en ese período
+        if (cuentasContables_Repository.existsById(idCuenta)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Ya existe una cuenta con el código '" + dto.getCodigo() +
+                            "' en el período contable " + dto.getPeriodoContableId());
+        }
+
+        // 2. Verificar que el período exista
         PeriodoContable periodo = periodoContable_Repository.findById(dto.getPeriodoContableId())
-                .orElseThrow(() -> new IllegalArgumentException("Periodo contable no encontrado o no suministrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Período contable no encontrado (ID: " + dto.getPeriodoContableId() + ")"));
 
-        // Si se suministró ID de cuenta padre, buscarla; si no, se queda en null.
+        // 3. Verificar cuenta padre (si se provee)
         CuentaContable cuentaPadre = null;
-        if (dto.getCuentaPadreId() != null) {
-            cuentaPadre = cuentasContables_Repository.findById(dto.getCuentaPadreId())
-                    .orElseThrow(() -> new IllegalArgumentException("Cuenta padre no encontrada."));
+        if (dto.getCuentaPadreId() != null && dto.getCuentaPadrePeriodoId() != null) {
+            CuentaContableId idPadre = new CuentaContableId(dto.getCuentaPadreId(), dto.getCuentaPadrePeriodoId());
+
+            // Validar que sea del mismo período contable
+            if (!dto.getCuentaPadrePeriodoId().equals(dto.getPeriodoContableId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "La cuenta padre debe pertenecer al mismo período contable");
+            }
+
+            cuentaPadre = cuentasContables_Repository.findById(idPadre)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Cuenta padre no encontrada (código: " + dto.getCuentaPadreId() + ")"));
         }
 
-        // Mapear el DTO a la entidad y asignar el período y la cuenta padre.
-        CuentaContable entity = modelMapper.map(dto, CuentaContable.class);
-        entity.setPeriodoContable(periodo);
-        entity.setCuentaPadre(cuentaPadre);
+        // 4. Crear y guardar
+        CuentaContable cuenta = mapper.map(dto, CuentaContable.class);
+        cuenta.setId(idCuenta);
+        cuenta.setPeriodoContable(periodo);
+        cuenta.setCuentaPadre(cuentaPadre);
 
-        // Guardar la entidad en la base de datos.
-        CuentaContable entityGuardada = cuentasContables_Repository.save(entity);
-
-        // Mapear la entidad guardada de vuelta a DTO y retornarla.
-        return modelMapper.map(entityGuardada, CuentaContableDTO.class);
+        CuentaContable guardada = cuentasContables_Repository.save(cuenta);
+        return mapper.map(guardada, CuentaContableDTO.class);
     }
-
 
     @Transactional
-    public CuentaContableDTO actualizarCuenta(Long id, CuentaContableDTO dto) {
-        CuentaContable cuentaExistente = cuentasContables_Repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cuenta contable no encontrada con ID: " + id));
+    public void eliminarCuenta(String codigo, Integer periodoId) {
+        CuentaContable cuenta = cuentasContables_Repository.findById(new CuentaContableId(codigo, periodoId))
+                .orElseThrow(() -> new EntityNotFoundException("Cuenta contable no encontrada"));
 
-        // Actualiza solo los campos no nulos del DTO
-        if (dto.getCodigo() != null) {
-            cuentaExistente.setCodigo(dto.getCodigo());
+        if (cuenta.getPeriodoContable().getEstado() != EstadoPeriodo.EDITABLE) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El período no está en estado EDITABLE.");
         }
 
-        if (dto.getNombre() != null) {
-            cuentaExistente.setNombre(dto.getNombre());
+        try {
+            cuentasContables_Repository.delete(cuenta);
+        } catch (DataIntegrityViolationException e) {
+            // Captura exacta del error de FK (relaciones hijas o movimientos)
+            String mensaje = String.format("❌ La cuenta \"%s\" del período %d tiene subcuentas o asientos asociados y no puede eliminarse.", codigo, periodoId);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, mensaje);
         }
-
-        if (dto.getTipo() != null) {
-            cuentaExistente.setTipo(dto.getTipo());
-        }
-
-        if (dto.getNivel() != null) {
-            cuentaExistente.setNivel(dto.getNivel());
-        }
-
-        if (dto.getCuentaPadreId() != null) {
-            CuentaContable cuentaPadre = cuentasContables_Repository.findById(dto.getCuentaPadreId())
-                    .orElseThrow(() -> new EntityNotFoundException("Cuenta padre no encontrada"));
-            cuentaExistente.setCuentaPadre(cuentaPadre);
-        }
-
-        if (dto.getPeriodoContableId() != null) {
-            PeriodoContable periodo = periodoContable_Repository.findById(dto.getPeriodoContableId())
-                    .orElseThrow(() -> new EntityNotFoundException("Periodo contable no encontrado"));
-            cuentaExistente.setPeriodoContable(periodo);
-        }
-
-        CuentaContable actualizada = cuentasContables_Repository.save(cuentaExistente);
-        return modelMapper.map(actualizada, CuentaContableDTO.class);
     }
-
-
-    @Transactional
-    public void eliminarCuenta(Long id) {
-        // Buscar la cuenta contable por ID
-        CuentaContable cuenta = cuentasContables_Repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cuenta contable no encontrada con ID " + id));
-
-        // Validar que el período contable asociado esté en estado EDITABLE
-        if (cuenta.getPeriodoContable() == null || cuenta.getPeriodoContable().getEstado() != EstadoPeriodo.EDITABLE) {
-            throw new IllegalStateException("No se puede eliminar la cuenta, el período contable no se encuentra en estado EDITABLE.");
-        }
-
-        // Eliminar la cuenta
-        cuentasContables_Repository.delete(cuenta);
-    }
-
 
 
 }

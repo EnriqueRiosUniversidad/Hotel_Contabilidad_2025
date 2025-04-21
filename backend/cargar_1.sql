@@ -3,8 +3,8 @@ INSERT INTO roles (name) VALUES ('contador'), ('user');
 
 -- Insertar usuarios
 INSERT INTO users (username, email, password, role_id)
-VALUES ('admin', 'admin@example.com', 'hashed_password', 1),
-       ('user1', 'user1@example.com', 'hashed_password', 2);
+VALUES ('admin', 'contador@email.com', '$2a$10$Q9l/KrMbaxHbDUL0.ZBg.eChDT5TAd4GjdBIdIhuch1OkvqHJm392', 1),
+       ('user1', 'user1@example.com', '$2a$10$Q9l/KrMbaxHbDUL0.ZBg.eChDT5TAd4GjdBIdIhuch1OkvqHJm392', 2);
 
 -- 1. Insertar períodos contables primero
 INSERT INTO periodos_contables ( anio, mes_inicio, mes_fin, estado)
