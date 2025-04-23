@@ -114,6 +114,51 @@ public class Cuenta_Service {
         CuentaContable guardada = cuentasContables_Repository.save(cuenta);
         return mapper.map(guardada, CuentaContableDTO.class);
     }
+    @Transactional
+    public CuentaContableDTO actualizarCuenta(CuentaContableDTO dto) {
+        if (dto.getCodigo() == null || dto.getPeriodoContableId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El código de la cuenta y el período contable son obligatorios para actualizar.");
+        }
+
+        CuentaContableId idCuenta = new CuentaContableId(dto.getCodigo(), dto.getPeriodoContableId());
+
+        CuentaContable cuentaExistente = cuentasContables_Repository.findById(idCuenta)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Cuenta contable no encontrada para actualización."));
+
+        // Solo actualiza si los valores no son nulos
+        if (dto.getNombre() != null) {
+            cuentaExistente.setNombre(dto.getNombre());
+        }
+        if (dto.getTipo() != null) {
+            cuentaExistente.setTipo(dto.getTipo());
+        }
+        if (dto.getNivel() != null) {
+            cuentaExistente.setNivel(dto.getNivel());
+        }
+
+        // Verificar y actualizar la cuenta padre si viene en el DTO
+        if (dto.getCuentaPadreId() != null && dto.getCuentaPadrePeriodoId() != null) {
+            if (!dto.getCuentaPadrePeriodoId().equals(dto.getPeriodoContableId())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "La cuenta padre debe pertenecer al mismo período contable");
+            }
+
+            CuentaContableId idPadre = new CuentaContableId(dto.getCuentaPadreId(), dto.getCuentaPadrePeriodoId());
+
+            CuentaContable cuentaPadre = cuentasContables_Repository.findById(idPadre)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Cuenta padre no encontrada (código: " + dto.getCuentaPadreId() + ")"));
+
+            cuentaExistente.setCuentaPadre(cuentaPadre);
+        }
+
+        CuentaContable actualizada = cuentasContables_Repository.save(cuentaExistente);
+        return mapper.map(actualizada, CuentaContableDTO.class);
+    }
+
+
 
     @Transactional
     public void eliminarCuenta(String codigo, Integer periodoId) {
