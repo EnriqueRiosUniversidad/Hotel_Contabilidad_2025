@@ -1,71 +1,14 @@
 /* Estilos personalizados */
 
-/* Aseguramos que la raíz ocupe toda la pantalla */
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-/* Contenedor personalizado con tamaño fijo (podés ajustar si querés que también sea full height) */
-.custom-container {
-  display: flex;
-  flex-direction: column;
-  width: 40%;
-  height: 810px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: white;
-  box-shadow: 3px 3px 6px rgba(0, 0, 0, 1.5);
-  box-sizing: border-box;
-}
-
-
-/* Mensaje de error (color verde en este caso) */
-.error-message {
-  background-color: rgb(79, 163, 53);
-  color: white;
-  padding: 1rem 2rem;
-  border-radius: 5px;
-}
-
 
 /* Fondo general que ahora ocupa toda la pantalla */
 .fondo-panel {
-  background-color: #afe7af; /* Verde claro (puedes ajustar este valor) */
-  min-height: 100vh; /* Ocupa al menos toda la altura del viewport */
+  background-color:  white; /* Verde claro (puedes ajustar este valor) */
+  min-height: 100%; /* Ocupa al menos toda la altura del viewport */
   width: 100%; /* Ocupa todo el ancho */
 }
 
-
-/* Imagen del logo */
-.log-image img {
-  width: 210px;
-  height: 210px;
-}
-
-
-
-/* Línea decorativa debajo del texto */
-p::before {
-  content: "";
-  position: absolute;
-  height: 2px;
-  width: 100%;
-  bottom: 0;
-  background-color: #ccc;
-  box-shadow: 0px 0px 5px rgb(56, 165, 14);
-}
-
-.nav-link {
-  display: block;
-  padding: 10px 15px;
-  margin: 2px 10px;
-  font-weight: bold;
-  color: black;
-  text-decoration: none;
-  border-radius: 5px;
-  transition: background-color 0.2s ease;
-}
+ 
 
 /* Verde cuando está activa */
 .nav-link.active {
@@ -78,3 +21,20 @@ p::before {
   background-color: #5bcf78;
   color: white;
 }
+
+/* Fondo verde solo para el menú lateral */
+.menu-container {
+  background-color: #6fdf67; /* Verde claro */
+  padding: 5px;
+  border-radius: 0 0px 0px 0;
+  min-height: 100vh;
+  width: 300px; /* Ajustá el ancho como prefieras */
+}
+
+.menu-logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 0px;
+  border-radius: 0px;
+}
+
