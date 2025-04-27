@@ -132,13 +132,13 @@ const LibroDiario = () => {
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container py-3">
+      <div className="container py-3"  style={{ marginLeft: '250px' }}>
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4 className="mb-0">Libro Diario</h4>
           <button className="btn btn-success btn-sm" onClick={() => navigate("/agregar-libro")}>
            Agregar nuevo
           </button>
-        </div>
+        </div> 
 
         <div className="row align-items-center mb-4">
           <div className="col-md-4"></div>
