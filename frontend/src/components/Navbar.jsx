@@ -3,7 +3,16 @@ import { NavLink } from 'react-router-dom';
 
 function Navbar() {
   return (
-    <div className="d-flex flex-column vh-100 p-3 text-white" style={{ width: '250px', backgroundColor: '#a8e6cf' }}>
+    <div
+      className="d-flex flex-column position-fixed top-0 start-0 vh-100 p-3 text-white"
+      style={{
+        width: '250px',
+        backgroundColor: '#a8e6cf',
+        zIndex: 1050,
+        overflowY: 'auto',
+        borderRight: '1px solid #ccc'
+      }}
+    >
       <h4 className="text-center text-dark mb-4">📚 Contabilidad</h4>
 
       <ul className="nav nav-pills flex-column mb-auto">
