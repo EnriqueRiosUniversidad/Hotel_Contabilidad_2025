@@ -1,31 +1,80 @@
-// src/components/Navbar.jsx
-
 import { logout } from '../utils/auth';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 function Navbar() {
   return (
-    <div className="d-flex flex-column vh-100 p-3 text-white" style={{ width: '250px', backgroundColor: '#a8e6cf' }}>
+    <div
+      className="d-flex flex-column position-fixed top-0 start-0 vh-100 p-3 text-white"
+      style={{
+        width: '250px',
+        backgroundColor: '#a8e6cf',
+        zIndex: 1050,
+        overflowY: 'auto',
+        borderRight: '1px solid #ccc'
+      }}
+    >
       <h4 className="text-center text-dark mb-4">📚 Contabilidad</h4>
 
       <ul className="nav nav-pills flex-column mb-auto">
         <li className="nav-item">
-          <Link to="#" className="nav-link text-dark">📘 Libro Diario</Link>
+          <NavLink
+            to="/libro-diario"
+            className={({ isActive }) =>
+              `nav-link text-dark ${isActive ? 'active fw-bold bg-light rounded border' : ''}`
+            }
+          >
+            📘 Libro Diario
+          </NavLink>
         </li>
         <li className="nav-item">
-          <Link to="#" className="nav-link text-dark">📗 Libro Mayor</Link>
+          <NavLink
+            to="/libro-mayor"
+            className={({ isActive }) =>
+              `nav-link text-dark ${isActive ? 'active fw-bold bg-light rounded border' : ''}`
+            }
+          >
+            📗 Libro Mayor
+          </NavLink>
         </li>
         <li className="nav-item">
-          <Link to="/cuentas" className="nav-link text-dark">➕ Agregar Plan de Cuenta</Link>
+          <NavLink
+            to="/cuentas"
+            className={({ isActive }) =>
+              `nav-link text-dark ${isActive ? 'active fw-bold bg-light rounded border' : ''}`
+            }
+          >
+            ➕ Agregar Plan de Cuenta
+          </NavLink>
         </li>
         <li className="nav-item">
-          <Link to="#" className="nav-link text-dark">📝 Agregar Asiento</Link>
+          <NavLink
+            to="/agregar-libro"
+            className={({ isActive }) =>
+              `nav-link text-dark ${isActive ? 'active fw-bold bg-light rounded border' : ''}`
+            }
+          >
+            📝 Agregar Asiento
+          </NavLink>
         </li>
         <li className="nav-item">
-          <Link to="#" className="nav-link text-dark">📊 Balance de Sumas y Saldos</Link>
+          <NavLink
+            to="/balance-sumas"
+            className={({ isActive }) =>
+              `nav-link text-dark ${isActive ? 'active fw-bold bg-light rounded border' : ''}`
+            }
+          >
+            📊 Balance de Sumas y Saldos
+          </NavLink>
         </li>
         <li className="nav-item">
-          <Link to="#" className="nav-link text-dark">📈 Balance de Resultados</Link>
+          <NavLink
+            to="/balance-resultados"
+            className={({ isActive }) =>
+              `nav-link text-dark ${isActive ? 'active fw-bold bg-light rounded border' : ''}`
+            }
+          >
+            📈 Balance de Resultados
+          </NavLink>
         </li>
       </ul>
 
@@ -37,4 +86,3 @@ function Navbar() {
 }
 
 export default Navbar;
-  

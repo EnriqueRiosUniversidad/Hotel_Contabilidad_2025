@@ -50,6 +50,13 @@ public class PlanDeCuentas_Controller {
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaCuenta);
     }
 
+    @PreAuthorize("hasRole('CONTADOR')")
+    @PutMapping("/cuenta")
+    public ResponseEntity<CuentaContableDTO> actualizarCuenta(@RequestBody CuentaContableDTO dto) {
+        CuentaContableDTO actualizada = cuentaService.actualizarCuenta(dto);
+        return ResponseEntity.ok(actualizada);
+    }
+
 
     @PreAuthorize("hasRole('CONTADOR')")
     @DeleteMapping("/")
