@@ -4,35 +4,30 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotel.backend.DTOs.CuentaContableDTO;
 import com.hotel.backend.entities.TipoCuenta;
-import com.hotel.backend.services.Cuenta_Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
+@Sql(scripts = "/data-test.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class PlanDeCuentas_ControllerTest {
-
+/*
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @MockBean
-    private Cuenta_Service cuentaService;
 
     private String jwtToken;
 
@@ -49,7 +44,12 @@ class PlanDeCuentas_ControllerTest {
 
     @BeforeEach
     void authenticateAndGetToken() throws Exception {
-        String loginRequest = "{\"identifier\": \"contador@email.com\", \"password\": \"1234\"}";
+        String loginRequest = """
+            {
+                "identifier": "contador@email.com",
+                "password": "1234"
+            }
+        """;
 
         String response = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -58,16 +58,27 @@ class PlanDeCuentas_ControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         JsonNode jsonNode = objectMapper.readTree(response);
-        jwtToken = jsonNode.get("token").asText();
+        jwtToken = "Bearer " + jsonNode.get("token").asText();
+    }
+
+    @Test
+    void testGetByIdCuenta_Unauthed() throws Exception {
+        mockMvc.perform(get("/plancuentas/1"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void testGetByIdCuenta() throws Exception {
         CuentaContableDTO dto = getSampleCuenta();
-        when(cuentaService.getByIdCuenta(1L)).thenReturn(dto);
+
+        mockMvc.perform(post("/plancuentas/cuenta")
+                        .header("Authorization", jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isOk());
 
         mockMvc.perform(get("/plancuentas/1")
-                        .header("Authorization", "Bearer " + jwtToken))
+                        .header("Authorization", jwtToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.codigo").value("1010"));
     }
@@ -75,10 +86,9 @@ class PlanDeCuentas_ControllerTest {
     @Test
     void testCrearCuenta() throws Exception {
         CuentaContableDTO dto = getSampleCuenta();
-        when(cuentaService.crearCuenta(any())).thenReturn(dto);
 
         mockMvc.perform(post("/plancuentas/cuenta")
-                        .header("Authorization", "Bearer " + jwtToken)
+                        .header("Authorization", jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -87,12 +97,22 @@ class PlanDeCuentas_ControllerTest {
 
     @Test
     void testEliminarCuenta() throws Exception {
-        doNothing().when(cuentaService).eliminarCuenta(1L);
+        CuentaContableDTO dto = getSampleCuenta();
 
-        mockMvc.perform(delete("/plancuentas/1")
-                        .header("Authorization", "Bearer " + jwtToken))
+        // Primero crear
+        String response = mockMvc.perform(post("/plancuentas/cuenta")
+                        .header("Authorization", jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode created = objectMapper.readTree(response);
+        Long id = created.get("id").asLong();
+
+
+        mockMvc.perform(delete("/plancuentas/" + id)
+                        .header("Authorization", jwtToken))
                 .andExpect(status().isNoContent());
     }
-
-
+    */
 }

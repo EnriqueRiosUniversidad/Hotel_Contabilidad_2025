@@ -21,4 +21,6 @@ public class AsientoContable {
 
     @Enumerated(EnumType.STRING)
     private TipoAsiento tipoAsiento;
+
+
 }
