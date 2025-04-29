@@ -1,40 +1,42 @@
-/* Estilos personalizados */
-
-
-/* Fondo general que ahora ocupa toda la pantalla */
-.fondo-panel {
-  background-color:  white; /* Verde claro (puedes ajustar este valor) */
-  min-height: 100%; /* Ocupa al menos toda la altura del viewport */
-  width: 100%; /* Ocupa todo el ancho */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
 }
 
- 
-
-/* Verde cuando está activa */
-.nav-link.active {
-  background-color: #28a745; /* Verde Bootstrap */
-  color: white !important;
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
-/* Hover opcional */
-.nav-link:hover {
-  background-color: #5bcf78;
-  color: white;
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* Fondo verde solo para el menú lateral */
-.menu-container {
-  background-color: #6fdf67; /* Verde claro */
-  padding: 5px;
-  border-radius: 0 0px 0px 0;
-  min-height: 100vh;
-  width: 300px; /* Ajustá el ancho como prefieras */
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
 }
 
-.menu-logo {
-  width: 150px;
-  height: auto;
-  margin-bottom: 0px;
-  border-radius: 0px;
+.card {
+  padding: 2em;
 }
 
+.read-the-docs {
+  color: #888;
+}
