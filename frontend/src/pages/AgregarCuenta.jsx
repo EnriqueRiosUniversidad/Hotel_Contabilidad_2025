@@ -94,7 +94,7 @@ function AgregarCuenta() {
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container mt-4" style={{ marginLeft: '250px' }}>
+      <div className="container mt-4" style={{ marginLeft: '270px' }}>
         <h2 className="mb-3 texto-principal">{seleccionada ? 'Editar Cuenta' : 'Agregar Cuenta Contable'}</h2>
         <form className="p-4 rounded shadow mb-4 bg-success bg-opacity-25" onSubmit={handleSubmit}>
           <div className="row mb-3">

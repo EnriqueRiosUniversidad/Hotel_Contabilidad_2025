@@ -76,7 +76,7 @@ const DetalleLibro = () => {
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container py-3" style={{ marginLeft:'250px'}}>
+      <div className="container py-3" style={{ marginLeft:'270px'}}>
         <h4 className="mb-3">Detalle del Registro #{registro.id}</h4>
 
         {/* Botones de exportación y editar */}

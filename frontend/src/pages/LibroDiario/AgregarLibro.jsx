@@ -53,7 +53,7 @@ const AgregarLibro = () => {
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container py-3"  style={{ marginLeft: '250px' }}>
+      <div className="container py-3"  style={{ marginLeft: '270px' }}>
         <h4 className="mb-3">Agregar nuevo registro al Libro Diario</h4>
 
         <form onSubmit={handleSubmit}>
