@@ -32,4 +32,17 @@ public class AsientoContableController {
         return ResponseEntity.ok(service.buscarPorId(asientoId));
     }
 
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AsientoContableDTO> actualizar(@PathVariable Long id, @RequestBody AsientoContableDTO dto) {
+        return ResponseEntity.ok(service.actualizar(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        service.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

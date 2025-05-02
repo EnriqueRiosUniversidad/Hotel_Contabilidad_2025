@@ -3,6 +3,7 @@
     import jakarta.persistence.*;
     import lombok.*;
 
+
     @Entity
     @Table(name = "cuentas_contables")
     @Data
@@ -23,6 +24,9 @@
 
         private Integer nivel;
 
+        @Column(nullable = false)
+        private boolean imputable;
+
         @ManyToOne
         @JoinColumns({
                 @JoinColumn(name = "cuenta_padre_codigo", referencedColumnName = "codigo"),
@@ -35,3 +39,4 @@
         @JoinColumn(name = "periodo_contable_id")
         private PeriodoContable periodoContable;
     }
+

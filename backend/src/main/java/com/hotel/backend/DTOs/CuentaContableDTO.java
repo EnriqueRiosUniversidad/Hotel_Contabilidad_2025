@@ -17,4 +17,8 @@ public class CuentaContableDTO {
 
     // Clave compuesta de esta cuenta
     private Integer periodoContableId;       // se combina con codigo para formar el ID compuesto
+
+    private boolean imputable;
+
+
 }

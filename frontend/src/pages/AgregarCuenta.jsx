@@ -13,17 +13,33 @@ function AgregarCuenta() {
 
   const tipos = ['ACTIVO', 'PASIVO', 'PATRIMONIO', 'INGRESO', 'EGRESO'];
 
-  useEffect(() => { fetchCuentas(); }, []);
+  useEffect(() => {
+    const periodoId = localStorage.getItem("periodoId");
+    const key = "cuentas_" + periodoId;
+    const cached = localStorage.getItem(key);
+  
+    if (cached) {
+      setCuentas(JSON.parse(cached));
+    } else {
+      fetchCuentas(periodoId);
+    }
+  }, []);
+  
 
-  const fetchCuentas = async () => {
+  const fetchCuentas = async (periodoId) => {
     try {
-      const res = await fetch(`${config.apiBaseUrl}/plancuentas/`, {
+      const res = await fetch(`${config.apiBaseUrl}/plancuentas/plan/${periodoId}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       const data = await res.json();
       setCuentas(data);
-    } catch (err) { alert('Error al obtener cuentas'); }
+      localStorage.setItem("cuentas_" + periodoId, JSON.stringify(data));
+    } catch (err) {
+      alert("Error al obtener cuentas");
+    }
   };
+  
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
