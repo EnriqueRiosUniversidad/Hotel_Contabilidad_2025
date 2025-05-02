@@ -1,26 +1,33 @@
 package com.hotel.backend.entities;
-import jakarta.persistence.*;
-import lombok.Data;
 
-import java.util.Date;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "asientos_contables")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AsientoContable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer asientoId;
+    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "periodo_id")
-    private PeriodoContable periodo;
+    private LocalDate fecha;
 
     private String descripcion;
-    private Date fecha;
 
-    @Enumerated(EnumType.STRING)
-    private TipoAsiento tipoAsiento;
+    private String tipoAsiento;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "periodo_id", nullable = false)
+    private PeriodoContable periodo;
 
+    @OneToMany(mappedBy = "asiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetalleAsiento> detalles;
 }

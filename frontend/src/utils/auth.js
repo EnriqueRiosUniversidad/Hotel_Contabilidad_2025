@@ -15,7 +15,9 @@ export function getToken() {
 // Elimina el token y redirige al login
 export function logout() {
   localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem("periodoId");
   window.location.href = '/login';
+  
 }
 
 // Verifica si el token existe y no ha expirado

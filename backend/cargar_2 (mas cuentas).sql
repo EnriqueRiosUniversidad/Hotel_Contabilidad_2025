@@ -89,16 +89,36 @@ VALUES
 ;
 
 
--- Insertar asiento contable
-INSERT INTO asientos_contables (periodo_id, descripcion, fecha, tipo_asiento)
-VALUES (1, 'Apertura de año', '2025-01-01', 'AJUSTE');
+-- Insertar los asientos contables (IDs del 1 al 10)
+INSERT INTO asientos_contables (id, periodo_id, descripcion, fecha, tipo_asiento)
+VALUES
+    (1, 1, 'Apertura de año',       '2025-01-01', 'AJUSTE'),
+    (2, 1, 'Asiento automático N°2','2025-01-03', 'REGULAR'),
+    (3, 1, 'Asiento automático N°3','2025-01-04', 'AJUSTE'),
+    (4, 1, 'Asiento automático N°4','2025-01-05', 'REGULAR'),
+    (5, 1, 'Asiento automático N°5','2025-01-06', 'AJUSTE'),
+    (6, 1, 'Asiento automático N°6','2025-01-07', 'REGULAR'),
+    (7, 1, 'Asiento automático N°7','2025-01-08', 'AJUSTE'),
+    (8, 1, 'Asiento automático N°8','2025-01-09', 'REGULAR'),
+    (9, 1, 'Asiento automático N°9','2025-01-10', 'AJUSTE'),
+    (10,1, 'Asiento automático N°10','2025-01-11','REGULAR');
 
--- Insertar detalles del asiento contable
-
+-- Insertar detalles de los asientos (dos movimientos por asiento)
 INSERT INTO detalles_asientos (asiento_id, cuenta_codigo, cuenta_periodo_contable_id, debe, haber)
 VALUES
-    (1, '1.1.1.1', 1, 10000.00, 0.00),  -- Debe en Caja
-    (1, '3.1',      1, 0.00,    10000.00); -- Haber en Capital Social
+    (1,  '1.1.1.1', 1, 10000.00, 0.00), (1,  '3.1', 1, 0.00, 10000.00),
+    (2,  '1.1.1.1', 1, 1000.00,  0.00), (2,  '3.1', 1, 0.00, 1000.00),
+    (3,  '1.1.1.1', 1, 1000.00,  0.00), (3,  '3.1', 1, 0.00, 1000.00),
+    (4,  '1.1.1.1', 1, 1000.00,  0.00), (4,  '3.1', 1, 0.00, 1000.00),
+    (5,  '1.1.1.1', 1, 1000.00,  0.00), (5,  '3.1', 1, 0.00, 1000.00),
+    (6,  '1.1.1.1', 1, 1000.00,  0.00), (6,  '3.1', 1, 0.00, 1000.00),
+    (7,  '1.1.1.1', 1, 1000.00,  0.00), (7,  '3.1', 1, 0.00, 1000.00),
+    (8,  '1.1.1.1', 1, 1000.00,  0.00), (8,  '3.1', 1, 0.00, 1000.00),
+    (9,  '1.1.1.1', 1, 1000.00,  0.00), (9,  '3.1', 1, 0.00, 1000.00),
+    (10, '1.1.1.1', 1, 1000.00,  0.00), (10, '3.1', 1, 0.00, 1000.00);
+
+
+
 
 -- Insertar modelos de asientos
 INSERT INTO modelos_asientos (descripcion, tipo_asiento)
