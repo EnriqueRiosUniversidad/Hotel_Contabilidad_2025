@@ -1,187 +1,139 @@
 import { useState } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Navbar from '../../components/Navbar'; // Ajusta la ruta según donde tengas el Navbar
+import Navbar from "../../components/Navbar";
 
-const AgregarLibro = () => {
+function AgregarLibro() {
   const navigate = useNavigate();
-  const today = new Date().toISOString().split("T")[0];
+  const token = localStorage.getItem("auth_token");
+  const periodoId = parseInt(localStorage.getItem("periodoId"));
 
-  const [formData, setFormData] = useState({
-    id: "",
-    tipo: "",
-    fecha: today,
+  const [asiento, setAsiento] = useState({
+    fecha: "",
     descripcion: "",
-    total: "",
-    asiento: [],
+    tipoAsiento: "REGULAR",
+    periodoId,
+    detalles: [],
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const [detalle, setDetalle] = useState({
+    cuentaCodigo: "",
+    cuentaPeriodoContableId: periodoId,
+    debe: 0,
+    haber: 0,
+  });
 
-  const handleAsientoChange = (index, field, value) => {
-    const nuevosAsientos = [...formData.asiento];
-    nuevosAsientos[index][field] = value;
-    setFormData((prev) => ({ ...prev, asiento: nuevosAsientos }));
-  };
-
-  const agregarFilaAsiento = () => {
-    const nuevo = {
-      id: formData.asiento.length + 1,
-      cod: "",
-      cuenta: "",
-      debe: "",
-      haber: "",
-    };
-    setFormData((prev) => ({ ...prev, asiento: [...prev.asiento, nuevo] }));
+  const agregarDetalle = () => {
+    if (!detalle.cuentaCodigo) return;
+    setAsiento((prev) => ({
+      ...prev,
+      detalles: [...prev.detalles, detalle],
+    }));
+    setDetalle({ cuentaCodigo: "", cuentaPeriodoContableId: periodoId, debe: 0, haber: 0 });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const nuevoRegistro = {
-      ...formData,
-      id: Math.floor(Math.random() * 10000),
-    };
-    const registros = JSON.parse(localStorage.getItem("libroDiario")) || [];
-    registros.push(nuevoRegistro);
-    localStorage.setItem("libroDiario", JSON.stringify(registros));
-    alert("Registro agregado correctamente");
-    navigate("/libro-diario");
+    axios
+      .post("/librodiario", asiento, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then(() => navigate("/librodiario"))
+      .catch((err) => console.error("Error al guardar asiento:", err));
   };
 
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container py-3"  style={{ marginLeft: '270px' }}>
-        <h4 className="mb-3">Agregar nuevo registro al Libro Diario</h4>
-
+      <div className="container py-3" style={{ marginLeft: "270px" }}>
+        <h2>Agregar Asiento Contable</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <div className="col-md-3">
-              <label className="form-label">Descripción</label>
-              <input
-                type="text"
-                className="form-control"
-                name="descripcion"
-                value={formData.descripcion}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <label>Fecha</label>
+            <input
+              type="date"
+              className="form-control"
+              value={asiento.fecha}
+              onChange={(e) => setAsiento({ ...asiento, fecha: e.target.value })}
+              required
+            />
           </div>
 
           <div className="mb-3">
-            <div className="col-md-3">
-              <label className="form-label">Fecha</label>
-              <input
-                type="date"
-                className="form-control"
-                name="fecha"
-                value={formData.fecha}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <label>Descripción</label>
+            <input
+              type="text"
+              className="form-control"
+              value={asiento.descripcion}
+              onChange={(e) => setAsiento({ ...asiento, descripcion: e.target.value })}
+              required
+            />
           </div>
 
           <div className="mb-3">
-            <div className="col-md-3">
-              <label className="form-label">Total</label>
+            <label>Tipo de Asiento</label>
+            <select
+              className="form-control"
+              value={asiento.tipoAsiento}
+              onChange={(e) => setAsiento({ ...asiento, tipoAsiento: e.target.value })}
+            >
+              <option value="REGULAR">REGULAR</option>
+              <option value="AJUSTE">AJUSTE</option>
+            </select>
+          </div>
+
+          <h5>Detalle del Asiento</h5>
+          <div className="row g-2 mb-3">
+            <div className="col">
               <input
                 type="text"
                 className="form-control"
-                name="total"
-                value={formData.total}
-                onChange={handleChange}
-                required
+                placeholder="Código cuenta"
+                value={detalle.cuentaCodigo}
+                onChange={(e) => setDetalle({ ...detalle, cuentaCodigo: e.target.value })}
               />
+            </div>
+            <div className="col">
+              <input
+                type="number"
+                className="form-control"
+                placeholder="Debe"
+                value={detalle.debe}
+                onChange={(e) => setDetalle({ ...detalle, debe: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+            <div className="col">
+              <input
+                type="number"
+                className="form-control"
+                placeholder="Haber"
+                value={detalle.haber}
+                onChange={(e) => setDetalle({ ...detalle, haber: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+            <div className="col-auto">
+              <button type="button" className="btn btn-primary" onClick={agregarDetalle}>
+                +
+              </button>
             </div>
           </div>
 
-          <h5 className="mt-4">Asiento Contable</h5>
-          <table className="table table-bordered">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Código</th>
-                <th>Cuenta</th>
-                <th>Debe</th>
-                <th>Haber</th>
-              </tr>
-            </thead>
-            <tbody>
-              {formData.asiento.map((item, index) => (
-                <tr key={item.id}>
-                  <td>{item.id}</td>
-                  <td>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={item.cod}
-                      onChange={(e) =>
-                        handleAsientoChange(index, "cod", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={item.cuenta}
-                      onChange={(e) =>
-                        handleAsientoChange(index, "cuenta", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={item.debe}
-                      onChange={(e) =>
-                        handleAsientoChange(index, "debe", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={item.haber}
-                      onChange={(e) =>
-                        handleAsientoChange(index, "haber", e.target.value)
-                      }
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ul className="list-group mb-3">
+            {asiento.detalles.map((d, index) => (
+              <li key={index} className="list-group-item">
+                {d.cuentaCodigo} — Debe: {d.debe} / Haber: {d.haber}
+              </li>
+            ))}
+          </ul>
 
-          <button
-            type="button"
-            className="btn btn-outline-success mb-3"
-            onClick={agregarFilaAsiento}
-          >
-            Agregar cuenta
-          </button>
-
-          <br />
-          <button type="submit" className="btn btn-success">
-            Guardar
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary ms-2"
-            onClick={() => navigate(-1)}
-          >
+          <button type="submit" className="btn btn-success">Guardar</button>
+          <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate("/librodiario")}>
             Cancelar
           </button>
         </form>
       </div>
     </div>
   );
-};
+}
 
 export default AgregarLibro;

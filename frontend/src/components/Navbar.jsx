@@ -24,9 +24,11 @@ function Navbar() {
           <NavLink
             to="/libro-diario"
             className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${isActive
-                ? 'bg-success text-white fw-bold rounded border border-success'
-                : 'text-dark'}`
+              `nav-link d-flex align-items-center ${
+                isActive
+                  ? 'bg-success text-white fw-bold rounded border border-success'
+                  : 'text-dark'
+              }`
             }
           >
             📘 Libro Diario
@@ -37,9 +39,11 @@ function Navbar() {
           <NavLink
             to="/libro-mayor"
             className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${isActive
-                ? 'bg-success text-white fw-bold rounded border border-success'
-                : 'text-dark'}`
+              `nav-link d-flex align-items-center ${
+                isActive
+                  ? 'bg-success text-white fw-bold rounded border border-success'
+                  : 'text-dark'
+              }`
             }
           >
             📗 Libro Mayor
@@ -50,9 +54,11 @@ function Navbar() {
           <NavLink
             to="/cuentas"
             className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${isActive
-                ? 'bg-success text-white fw-bold rounded border border-success'
-                : 'text-dark'}`
+              `nav-link d-flex align-items-center ${
+                isActive
+                  ? 'bg-success text-white fw-bold rounded border border-success'
+                  : 'text-dark'
+              }`
             }
           >
             <img
@@ -68,9 +74,11 @@ function Navbar() {
           <NavLink
             to="/agregar-libro"
             className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${isActive
-                ? 'bg-success text-white fw-bold rounded border border-success'
-                : 'text-dark'}`
+              `nav-link d-flex align-items-center ${
+                isActive
+                  ? 'bg-success text-white fw-bold rounded border border-success'
+                  : 'text-dark'
+              }`
             }
           >
             📝 Agregar Asiento
@@ -81,9 +89,11 @@ function Navbar() {
           <NavLink
             to="/balance-sumas"
             className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${isActive
-                ? 'bg-success text-white fw-bold rounded border border-success'
-                : 'text-dark'}`
+              `nav-link d-flex align-items-center ${
+                isActive
+                  ? 'bg-success text-white fw-bold rounded border border-success'
+                  : 'text-dark'
+              }`
             }
           >
             📊 Balance de Sumas y Saldos
@@ -94,9 +104,11 @@ function Navbar() {
           <NavLink
             to="/balance-resultados"
             className={({ isActive }) =>
-              `nav-link d-flex align-items-center ${isActive
-                ? 'bg-success text-white fw-bold rounded border border-success'
-                : 'text-dark'}`
+              `nav-link d-flex align-items-center ${
+                isActive
+                  ? 'bg-success text-white fw-bold rounded border border-success'
+                  : 'text-dark'
+              }`
             }
           >
             📈 Balance de Resultados

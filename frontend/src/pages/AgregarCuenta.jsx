@@ -167,4 +167,4 @@ function AgregarCuenta() {
   );
 }
 
-export default AgregarCuenta
+export default AgregarCuenta;

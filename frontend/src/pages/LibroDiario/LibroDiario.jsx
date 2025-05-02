@@ -1,84 +1,29 @@
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import * as XLSX from "xlsx";
+import Navbar from "../../components/Navbar";
 import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import Navbar from '../../components/Navbar'; // Ajusta la ruta si tu Navbar.jsx está en otra carpeta
 
-const LibroDiario = () => {
+function LibroDiario() {
+  const [asientos, setAsientos] = useState([]);
   const [search, setSearch] = useState("");
-  const [registros, setRegistros] = useState([]);
+  const periodoId = localStorage.getItem("periodoId");
+  const token = localStorage.getItem("auth_token");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const datosIniciales = [
-      {
-        id: 1,
-        tipo: "Manual",
-        fecha: "2025-03-21",
-        descripcion: "Venta de Mercadería",
-        total: "1.100.000",
-        asiento: [
-          { id: 1, cod: "111", cuenta: "Venta de Mercadería", debe: "1.100.000", haber: "" },
-          { id: 2, cod: "212", cuenta: "Caja", debe: "", haber: "1.000.000" },
-          { id: 3, cod: "301", cuenta: "IVA 10%", debe: "", haber: "100.000" },
-        ],
-      },
-      {
-        id: 2,
-        tipo: "Automatico",
-        fecha: "2025-03-20",
-        descripcion: "Adelanto de saldo",
-        total: "15.000.000",
-        asiento: [
-          { id: 1, cod: "111", cuenta: "Sueldos a pagar", debe: "15.000.000", haber: "" },
-          { id: 2, cod: "212", cuenta: "Caja", debe: "", haber: "15.000.000" },
-        ],
-      },
-      {
-        id: 3,
-        tipo: "Manual",
-        fecha: "2025-03-19",
-        descripcion: "Ingreso por servicio técnico",
-        total: "2.500.000",
-        asiento: [
-          { id: 1, cod: "400", cuenta: "Servicios", debe: "2.500.000", haber: "" },
-          { id: 2, cod: "212", cuenta: "Caja", debe: "", haber: "2.500.000" },
-        ],
-      },
-      {
-        id: 4,
-        tipo: "Manual",
-        fecha: "2025-03-18",
-        descripcion: "Compra de mercadería",
-        total: "5.000.000",
-        asiento: [
-          { id: 1, cod: "110", cuenta: "Mercaderías", debe: "5.000.000", haber: "" },
-          { id: 2, cod: "212", cuenta: "Caja", debe: "", haber: "5.000.000" },
-        ],
-      },
-    ];
+    api
+      .get(`/librodiario/${periodoId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setAsientos(res.data))
+      .catch((err) => console.error("Error al obtener asientos:", err));
+  }, [periodoId]);
 
-    const datosGuardados = JSON.parse(localStorage.getItem("libroDiario"));
-
-    if (!Array.isArray(datosGuardados) || datosGuardados.length === 0) {
-      localStorage.setItem("libroDiario", JSON.stringify(datosIniciales));
-      setRegistros(datosIniciales);
-    } else {
-      setRegistros(datosGuardados);
-    }
-  }, []);
-
-  const handleEliminar = (id) => {
-    if (window.confirm("¿Estás seguro de eliminar este registro?")) {
-      const nuevosRegistros = registros.filter((item) => item.id !== id);
-      setRegistros(nuevosRegistros);
-      localStorage.setItem("libroDiario", JSON.stringify(nuevosRegistros));
-    }
-  };
-
-  const filtrado = registros.filter((item) =>
+  const filtrado = asientos.filter((item) =>
     item.fecha.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -102,7 +47,7 @@ const LibroDiario = () => {
       head: [["#", "Tipo", "Fecha", "Descripción", "Total"]],
       body: filtrado.map((item) => [
         item.id,
-        item.tipo,
+        item.tipoAsiento,
         item.fecha,
         item.descripcion,
         item.total,
@@ -129,16 +74,26 @@ const LibroDiario = () => {
     saveAs(blob, "LibroDiario.xml");
   };
 
+  const handleEliminar = (id) => {
+    if (!window.confirm("¿Está seguro de que desea eliminar este registro?")) return;
+    api
+      .delete(`/librodiario/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then(() => setAsientos(asientos.filter((a) => a.id !== id)))
+      .catch((err) => console.error("Error al eliminar asiento:", err));
+  };
+
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container py-3"  style={{ marginLeft: '270px' }}>
+      <div className="container py-3" style={{ marginLeft: "270px" }}>
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4 className="mb-0">Libro Diario</h4>
           <button className="btn btn-success btn-sm" onClick={() => navigate("/agregar-libro")}>
-           Agregar nuevo
+            Agregar nuevo
           </button>
-        </div> 
+        </div>
 
         <div className="row align-items-center mb-4">
           <div className="col-md-4"></div>
@@ -171,41 +126,37 @@ const LibroDiario = () => {
           </div>
         </div>
 
-        <table className="table table-hover">
+        <table className="table table-bordered">
           <thead>
-            <tr className="table-active">
-              <th>#</th>
-              <th>Tipo</th>
+            <tr>
               <th>Fecha</th>
               <th>Descripción</th>
-              <th>Total</th>
-              <th>Opciones</th>
+              <th>Tipo</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody>
-            {filtrado.map((item) => (
-              <tr key={item.id}>
-                <td>{item.id}</td>
-                <td>{item.tipo}</td>
-                <td>{item.fecha}</td>
-                <td>{item.descripcion}</td>
-                <td>{item.total}</td>
+            {filtrado.map((asiento) => (
+              <tr key={asiento.id}>
+                <td>{asiento.fecha}</td>
+                <td>{asiento.descripcion}</td>
+                <td>{asiento.tipoAsiento}</td>
                 <td>
                   <button
-                    className="btn btn-sm btn-outline-secondary me-1"
-                    onClick={() => navigate("/detalle-libro", { state: { registro: item } })}
+                    className="btn btn-info btn-sm me-1"
+                    onClick={() => navigate(`/detalle-libro/${asiento.id}`)}
                   >
                     Ver
                   </button>
                   <button
-                    className="btn btn-sm btn-outline-primary me-1"
-                    onClick={() => navigate("/editar-libro", { state: { registro: item } })}
+                    className="btn btn-outline-primary btn-sm me-1"
+                    onClick={() => navigate("/editar-libro", { state: { registro: asiento } })}
                   >
                     Editar
                   </button>
                   <button
-                    className="btn btn-sm btn-outline-danger"
-                    onClick={() => handleEliminar(item.id)}
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={() => handleEliminar(asiento.id)}
                   >
                     Eliminar
                   </button>
@@ -217,6 +168,6 @@ const LibroDiario = () => {
       </div>
     </div>
   );
-};
+}
 
 export default LibroDiario;

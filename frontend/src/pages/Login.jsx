@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { saveToken } from '../utils/auth';
 import config from '../config';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function Login() {
   const [identifier, setIdentifier] = useState('');
@@ -30,7 +32,7 @@ function Login() {
 
   return (
     <div className="container-fluid vh-100 d-flex p-0">
-    
+      {/* Columna izquierda con imagen */}
       <div className="col-md-6 d-none d-md-block p-0">
         <img
           src="/inicio.jpg"
@@ -39,32 +41,30 @@ function Login() {
         />
       </div>
 
-
+      {/* Columna derecha con el formulario */}
       <div className="col-md-6 d-flex align-items-center justify-content-center"
-  style={{ backgroundColor: '#73c768be' }} >
+        style={{ backgroundColor: '#73c768be' }}>
         <form
           onSubmit={handleSubmit}
           className="p-4 rounded shadow border border-success"
           style={{
             width: '100%',
             maxWidth: '400px',
-            backgroundColor: 'rgba(255, 255, 255, 0.2)', 
-            backdropFilter: 'blur(5px)' 
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(5px)',
           }}
-          
         >
-          <div className="text-center mb-3">
-          <div className="flex flex-col items-center space-y-4">
-          <div className="bg-verde-bosque text-white rounded-full w-14 h-14 flex items-center justify-center shadow">
-            <i className="bi bi-bar-chart-fill text-xl"></i>
-          </div>
-          <h2 className="text-2xl font-bold texto-principal">Bienvenido</h2>
-          <p className="text-sm text-gray-600">Sistema Contable - Inicio de sesión</p>
-        </div>
+          <div className="text-center mb-4">
+            <div className="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+              style={{ width: '56px', height: '56px' }}>
+              <i className="bi bi-bar-chart-fill fs-4"></i>
+            </div>
+            <h2 className="fw-bold mt-3">Bienvenido</h2>
+            <p className="text-muted">Sistema Contable - Inicio de sesión</p>
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Usuario:</label>
+            <label className="form-label">Usuario</label>
             <input
               type="text"
               className="form-control"
@@ -75,7 +75,7 @@ function Login() {
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Contraseña:</label>
+            <label className="form-label">Contraseña</label>
             <input
               type="password"
               className="form-control"
@@ -86,12 +86,12 @@ function Login() {
           </div>
 
           {error && (
-            <div className="alert alert-danger py-1 text-center">
+            <div className="alert alert-danger text-center py-2">
               {error}
             </div>
           )}
 
-          <div className="d-grid">
+          <div className="d-grid mt-3">
             <button type="submit" className="btn btn-success">
               Ingresar
             </button>
