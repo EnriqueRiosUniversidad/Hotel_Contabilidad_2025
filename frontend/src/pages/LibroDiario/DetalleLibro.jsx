@@ -12,9 +12,10 @@ const DetalleLibro = () => {
   const { asientoId } = useParams();
   const navigate = useNavigate();
   const [asiento, setAsiento] = useState(null);
-  const token = localStorage.getItem("auth_token");
 
   useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+
     api.get(`/librodiario/detalle/${asientoId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -37,32 +38,32 @@ const DetalleLibro = () => {
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    saveAs(blob, `Detalle_Registro_${asiento.id}.xlsx`);
+    saveAs(blob, `Detalle_Registro_${asiento.id || "sin_id"}.xlsx`);
   };
 
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(16);
-    doc.text(`Detalle del Registro #${asiento.id}`, 14, 15);
+    doc.text(`Detalle del Registro #${asiento.id || "sin_id"}`, 14, 15);
     doc.autoTable({
       startY: 25,
       head: [["#", "Código", "Cuenta", "Debe", "Haber"]],
-      body: asiento.detalles.map((item, index) => [
+      body: asiento.detalles?.map((item, index) => [
         index + 1,
         item.cuentaCodigo,
         item.cuentaNombre,
-        item.debe.toFixed(2),
-        item.haber.toFixed(2),
-      ]),
+        parseFloat(item.debe || 0).toFixed(2),
+        parseFloat(item.haber || 0).toFixed(2),
+      ]) || [],
       theme: "striped",
       styles: { fontSize: 10 },
     });
-    doc.save(`Detalle_Registro_${asiento.id}.pdf`);
+    doc.save(`Detalle_Registro_${asiento.id || "sin_id"}.pdf`);
   };
 
   const exportToXML = () => {
     let xml = "<?xml version='1.0' encoding='UTF-8'?>\n<AsientoContable>\n";
-    asiento.detalles.forEach((item) => {
+    asiento.detalles?.forEach((item) => {
       xml += "  <Item>\n";
       Object.entries(item).forEach(([key, value]) => {
         xml += `    <${key}>${value}</${key}>\n`;
@@ -71,7 +72,7 @@ const DetalleLibro = () => {
     });
     xml += "</AsientoContable>";
     const blob = new Blob([xml], { type: "application/xml" });
-    saveAs(blob, `Detalle_Registro_${asiento.id}.xml`);
+    saveAs(blob, `Detalle_Registro_${asiento.id || "sin_id"}.xml`);
   };
 
   return (
@@ -124,13 +125,13 @@ const DetalleLibro = () => {
             </tr>
           </thead>
           <tbody>
-            {asiento.detalles.map((item, index) => (
+            {asiento.detalles?.map((item, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
                 <td>{item.cuentaCodigo}</td>
                 <td>{item.cuentaNombre}</td>
-                <td>{item.debe.toFixed(2)}</td>
-                <td>{item.haber.toFixed(2)}</td>
+                <td>{parseFloat(item.debe || 0).toFixed(2)}</td>
+                <td>{parseFloat(item.haber || 0).toFixed(2)}</td>
               </tr>
             ))}
             <tr>
@@ -141,9 +142,7 @@ const DetalleLibro = () => {
           </tbody>
         </table>
 
-        <button className="btn btn-secondary" onClick={() => navigate("/libro-diario")}>
-          Volver
-        </button>
+        <button className="btn btn-secondary" onClick={() => navigate("/libro-diario")}>Volver</button>
       </div>
     </div>
   );

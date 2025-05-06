@@ -1,6 +1,5 @@
 
-  // src/routes/AppRoutes.jsx
-
+  
   import { Routes, Route, Navigate } from 'react-router-dom';
   import Login from '../pages/Login';
   import Home from '../pages/Home';
@@ -9,6 +8,11 @@
   import LibroDiario from '../pages/LibroDiario/LibroDiario';
   import AgregarLibro from '../pages/LibroDiario/AgregarLibro';
   import DetalleLibro from '../pages/LibroDiario/DetalleLibro';
+
+  
+  import BalanceSYS from '../pages/BalanceSYS/BalanceSYS';
+  import BalanceGeneral from '../pages/BalanceGeneral/BalanceGeneral';
+  import BalanceResulado from '../pages/BalanceResultado/BalanceResultado';
 
 
   import { isTokenValid } from '../utils/auth';
@@ -24,6 +28,10 @@
         <Route path="/libro-diario" element={<LibroDiario />} />
         <Route path="/agregar-libro" element={<AgregarLibro />} />
         <Route path="/detalle-libro/:asientoId" element={<DetalleLibro />} />
+        <Route path="/balance-sumas" element={<BalanceSYS />} />
+        <Route path="/balanceGeneral" element={<BalanceGeneral />} />
+        <Route path="/balance-resultados" element={<BalanceResulado />} />
+
 
       </Routes>
     );

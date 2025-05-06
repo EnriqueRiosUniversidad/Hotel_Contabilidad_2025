@@ -84,6 +84,25 @@ function Navbar() {
             📝 Agregar Asiento
           </NavLink>
         </li>
+        <li className="nav-item">
+          <NavLink
+            to="/balanceGeneral"
+            className={({ isActive }) =>
+              `nav-link d-flex align-items-center ${
+                isActive
+                  ? 'bg-success text-white fw-bold rounded border border-success'
+                  : 'text-dark'
+              }`
+            }
+          >
+           <img
+              src="BalanceG.png"
+              alt="Agregar"
+              style={{ width: '25px', height: '25px', marginRight: '10px' }}
+            />
+            Balance General
+          </NavLink>
+        </li>
 
         <li className="nav-item">
           <NavLink
@@ -99,7 +118,7 @@ function Navbar() {
             📊 Balance de Sumas y Saldos
           </NavLink>
         </li>
-
+        
         <li className="nav-item">
           <NavLink
             to="/balance-resultados"
