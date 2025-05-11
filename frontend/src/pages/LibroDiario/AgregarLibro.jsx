@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../../api/axios"; // Usamos la instancia con baseURL
 import Navbar from "../../components/Navbar";
 
 function AgregarLibro() {
-  const { state } = useLocation();
+  const { id } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("auth_token");
   const periodoId = localStorage.getItem("periodoId");
 
-  const [asiento, setAsiento] = useState(state || {
+  const [asiento, setAsiento] = useState({
     fecha: "",
     descripcion: "",
     tipoAsiento: "REGULAR",
@@ -28,21 +28,38 @@ function AgregarLibro() {
   const [sugerencias, setSugerencias] = useState([]);
   const [errorBalance, setErrorBalance] = useState("");
 
+  const esEdicion = Boolean(id);
+
   useEffect(() => {
     const key = "cuentas_" + periodoId;
     const cache = localStorage.getItem(key);
     if (cache) {
       setCuentas(JSON.parse(cache));
     }
-  }, [periodoId]);
+
+    if (esEdicion) {
+      api.get(`/librodiario/detalle/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => {
+          const datos = res.data;
+          if (!Array.isArray(datos.detalles)) {
+            datos.detalles = [];
+          }
+          setAsiento(datos);
+        })
+        .catch(err => {
+          console.error("Error al cargar asiento:", err);
+          alert("Error al cargar los datos del asiento.");
+        });
+    }
+  }, [id]);
 
   const handleCuentaInput = (e) => {
     const valor = e.target.value;
     setDetalle({ ...detalle, cuentaCodigo: valor });
     const filtradas = cuentas.filter(
-      (c) =>
-        c.codigo.startsWith(valor) &&
-        c.imputable === true
+      (c) => c.codigo.startsWith(valor) && c.imputable === true
     );
     setSugerencias(filtradas);
   };
@@ -84,27 +101,41 @@ function AgregarLibro() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     if (!validarPartidaDoble()) {
       setErrorBalance("Debe y Haber no coinciden.");
       return;
     }
+
+    const cuentaInvalida = asiento.detalles.some(d => !d.cuentaCodigo);
+    if (cuentaInvalida) {
+      alert("Hay detalles sin código de cuenta válido.");
+      return;
+    }
+
     setErrorBalance("");
-    axios
-      .post("/librodiario", asiento, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+
+    const metodo = esEdicion ? "put" : "post";
+    const url = esEdicion ? `/librodiario/${id}` : "/librodiario";
+
+    api[metodo](url, asiento, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then(() => {
         localStorage.setItem("actualizarAsientos", "true");
-        navigate("/librodiario");
+        navigate("/libro-diario");
       })
-      .catch((err) => console.error("Error al guardar asiento:", err));
+      .catch((err) => {
+        console.error("Error al guardar asiento:", err);
+        alert("Ocurrió un error al guardar el asiento.");
+      });
   };
 
   return (
     <div className="d-flex">
       <Navbar />
       <div className="flex-grow-1 p-4" style={{ marginLeft: "250px" }}>
-        <h2>Agregar Asiento Contable</h2>
+        <h2>{esEdicion ? "Editar Asiento" : "Agregar Asiento Contable"}</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label>Fecha</label>
@@ -193,16 +224,16 @@ function AgregarLibro() {
           {errorBalance && <div className="alert alert-danger">{errorBalance}</div>}
 
           <ul className="list-group mb-3">
-            {asiento.detalles.map((d, index) => (
+            {Array.isArray(asiento.detalles) && asiento.detalles.map((d, index) => (
               <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                {d.cuentaCodigo} — Debe: {d.debe} / Haber: {d.haber}
+                {d.cuentaCodigo || "[Sin cuenta]"} — Debe: {d.debe} / Haber: {d.haber}
                 <button className="btn btn-sm btn-outline-danger" onClick={() => eliminarDetalle(index)}>🗑️</button>
               </li>
             ))}
           </ul>
 
           <button type="submit" className="btn btn-success">Guardar</button>
-          <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate("/librodiario")}>
+          <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate("/libro-diario")}>
             Cancelar
           </button>
         </form>

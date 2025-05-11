@@ -22,6 +22,7 @@
         <Route path="/cuentas" element={isTokenValid() ? <AgregarCuenta /> : <Navigate to="/login" />} />
         <Route path="/libro-diario" element={<LibroDiario />} />
         <Route path="/agregar-libro" element={<AgregarLibro />} />
+        <Route path="/agregar-libro/:id" element={<AgregarLibro />} />
         <Route path="/detalle-libro/:asientoId" element={<DetalleLibro />} />
 
       </Routes>

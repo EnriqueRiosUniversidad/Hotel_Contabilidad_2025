@@ -71,7 +71,7 @@ function LibroDiario() {
                 <td>{asiento.tipoAsiento}</td>
                 <td>
                   <button className="btn btn-info btn-sm me-1" onClick={() => navigate(`/detalle-libro/${asiento.id}`)}>Ver</button>
-                  <button className="btn btn-warning btn-sm me-1" onClick={() => navigate("/agregar-libro", { state: asiento })}>Editar</button>
+                  <button className="btn btn-warning btn-sm me-1" onClick={() => navigate(`/agregar-libro/${asiento.id}`)}>Editar</button>
                   <button className="btn btn-danger btn-sm" onClick={() => handleEliminar(asiento.id)}>Eliminar</button>
                 </td>
               </tr>
