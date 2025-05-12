@@ -1,6 +1,8 @@
-
-import Navbar from '../components/Navbar';
 import { useEffect, useState } from 'react';
+import Navbar from '../components/Navbar';
+import DashboardIngresosEgresos from '../components/DashboardIngresosEgresos';
+import DashboardFlujoCaja from "../components/DashboardFlujoCaja";
+import DashboardComprasProveedor from "../components/DashboardComprasProveedor";
 
 function Home() {
   const [periodoId, setPeriodoId] = useState(() => localStorage.getItem("periodoId") || "1");
@@ -28,8 +30,16 @@ function Home() {
             <option value="2">2026 - Enero a Diciembre</option>
           </select>
         </div>
+
+        {/* Dashboard visual de ingresos vs egresos, flujo y compras */}
+        <div className="d-flex gap-4 mt-5 flex-wrap">
+          <DashboardIngresosEgresos />
+          <DashboardFlujoCaja />
+          <DashboardComprasProveedor />
+        </div>
       </div>
     </div>
-  ); 
+  );
 }
-  export default Home;
+
+export default Home;

@@ -15,11 +15,8 @@ export function getToken() {
 // Elimina el token y redirige al login
 export function logout() {
   localStorage.removeItem(TOKEN_KEY);
-
-  window.location.href = '/login';
   localStorage.removeItem("periodoId");
   window.location.href = '/login';
-  
 }
 
 // Verifica si el token existe y no ha expirado
@@ -29,10 +26,21 @@ export function isTokenValid() {
 
   try {
     const { exp } = jwtDecode(token);
-    return exp * 1000 > Date.now(); // Exp está en segundos, Date.now() en ms
+    return exp * 1000 > Date.now(); // exp está en segundos, Date.now() en milisegundos
   } catch {
     return false;
   }
 }
 
-  
+// Obtiene el rol del usuario desde el token
+export function getUserRole() {
+  const token = getToken();
+  if (!token) return null;
+
+  try {
+    const { role } = jwtDecode(token);
+    return role || null;
+  } catch {
+    return null;
+  }
+}
