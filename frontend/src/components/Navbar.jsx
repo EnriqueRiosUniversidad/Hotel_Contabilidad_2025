@@ -20,6 +20,26 @@ function Navbar() {
       <h4 className="text-center text-dark mb-4">Contabilidad</h4>
 
       <ul className="nav nav-pills flex-column mb-auto">
+      <li className="nav-item">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              `nav-link d-flex align-items-center ${
+                isActive
+                  ? 'bg-success text-white fw-bold rounded border border-success'
+                  : 'text-dark'
+              }`
+            }
+            
+          >
+              <img
+              src="Home-icon.png"
+              alt="Agregar"
+              style={{ width: '25px', height: '25px', marginRight: '10px' }}
+            />
+            Inicio
+          </NavLink>
+        </li>
         <li className="nav-item">
           <NavLink
             to="/libro-diario"

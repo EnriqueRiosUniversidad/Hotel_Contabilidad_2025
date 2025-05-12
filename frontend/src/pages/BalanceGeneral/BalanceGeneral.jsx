@@ -1,4 +1,4 @@
-// src/pages/BalanceSYS.jsx
+
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import { saveAs } from "file-saver";
