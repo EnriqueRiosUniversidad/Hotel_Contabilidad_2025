@@ -9,7 +9,10 @@
   import AgregarLibro from '../pages/LibroDiario/AgregarLibro';
   import DetalleLibro from '../pages/LibroDiario/DetalleLibro';
 
+import LibroMayor from '../pages/LibroMayor/LibroMayor';
 
+  import BalanceGeneral from '../pages/BalanceGeneral/BalanceGeneral';
+  import BalanceResultado from '../pages/BalanceResultado/BalanceResultado';
   import { isTokenValid } from '../utils/auth';
 
 
@@ -25,6 +28,10 @@
         <Route path="/agregar-libro/:id" element={<AgregarLibro />} />
         <Route path="/detalle-libro/:asientoId" element={<DetalleLibro />} />
 
+        <Route path="/libro-mayor" element={isTokenValid() ? <LibroMayor /> : <Navigate to="/login" />} />
+        <Route path="/balance-resultados" element={< BalanceResultado />} />
+
+        <Route path="/balanceGeneral" element={<BalanceGeneral />} />
       </Routes>
     );
   }

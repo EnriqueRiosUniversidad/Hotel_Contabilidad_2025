@@ -1,8 +1,10 @@
 package com.hotel.backend.services;
 
+import com.hotel.backend.DTOs.CuentaBalanceDTO;
 import com.hotel.backend.DTOs.CuentaContableDTO;
 import com.hotel.backend.entities.*;
 import com.hotel.backend.repository.CuentasContables_Repository;
+import com.hotel.backend.repository.DetalleAsientoRepository;
 import com.hotel.backend.repository.PeriodoContable_Repository;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,7 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +28,7 @@ public class Cuenta_Service {
 
     private final CuentasContables_Repository cuentasContables_Repository;
     private final PeriodoContable_Repository periodoContable_Repository;
+    private final DetalleAsientoRepository detalleAsientoRepository;
     private final ModelMapper mapper = new ModelMapper();
 
     @PostConstruct
@@ -176,6 +182,42 @@ public class Cuenta_Service {
             String mensaje = String.format("❌ La cuenta \"%s\" del período %d tiene subcuentas o asientos asociados y no puede eliminarse.", codigo, periodoId);
             throw new ResponseStatusException(HttpStatus.CONFLICT, mensaje);
         }
+    }
+
+
+
+
+    //Balance General
+
+    public List<CuentaBalanceDTO> obtenerBalanceGeneral(Integer periodoId) {
+        List<CuentaContable> cuentas = cuentasContables_Repository
+                .findByPeriodoContable_PeriodoId(periodoId)
+                .stream()
+                .filter(CuentaContable::isImputable)
+                .toList();
+
+        List<DetalleAsiento> detalles = detalleAsientoRepository.findByAsiento_Periodo_PeriodoId(periodoId);
+
+        Map<String, Double> saldos = new HashMap<>();
+
+        for (DetalleAsiento d : detalles) {
+            String clave = d.getCuenta().getId().getCodigo();
+            saldos.put(clave, saldos.getOrDefault(clave, 0.0) + d.getDebe() - d.getHaber());
+        }
+
+        return cuentas.stream()
+                .map(c -> {
+                    double saldo = saldos.getOrDefault(c.getId().getCodigo(), 0.0);
+                    if (saldo == 0.0) return null;
+                    CuentaBalanceDTO dto = new CuentaBalanceDTO();
+                    dto.setCuenta(c.getNombre());
+                    dto.setTipo(c.getTipo());
+                    dto.setSubtipo(c.getSubtipo());
+                    dto.setMonto(saldo);
+                    return dto;
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 
 

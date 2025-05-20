@@ -22,6 +22,10 @@
         @Enumerated(EnumType.STRING)
         private TipoCuenta tipo;
 
+        @Enumerated(EnumType.STRING)
+        @Column(nullable = false)
+        private SubtipoCuenta subtipo = SubtipoCuenta.NO_CLASIFICADO;
+
         private Integer nivel;
 
         @Column(nullable = false)

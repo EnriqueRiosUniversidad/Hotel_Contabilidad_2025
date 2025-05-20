@@ -1,5 +1,6 @@
     package com.hotel.backend.controllers;
 
+    import com.hotel.backend.DTOs.CuentaBalanceDTO;
     import com.hotel.backend.DTOs.CuentaContableDTO;
     import com.hotel.backend.services.Cuenta_Service;
     import lombok.RequiredArgsConstructor;
@@ -49,4 +50,12 @@
             cuentaService.eliminarCuenta(codigo, periodoId);
             return ResponseEntity.noContent().build();
         }
+
+
+        //Balance general
+        @GetMapping("/balance-general/{periodoId}")
+        public ResponseEntity<List<CuentaBalanceDTO>> obtenerBalance(@PathVariable Integer periodoId) {
+            return ResponseEntity.ok(cuentaService.obtenerBalanceGeneral(periodoId));
+        }
+
     }
