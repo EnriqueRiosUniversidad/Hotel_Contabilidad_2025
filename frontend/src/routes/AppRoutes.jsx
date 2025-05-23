@@ -10,7 +10,9 @@
   import DetalleLibro from '../pages/LibroDiario/DetalleLibro';
 
 import LibroMayor from '../pages/LibroMayor/LibroMayor';
+  
 
+  import BalanceSYS from '../pages/BalanceSYS/BalanceSYS';
   import BalanceGeneral from '../pages/BalanceGeneral/BalanceGeneral';
   import BalanceResultado from '../pages/BalanceResultado/BalanceResultado';
   import { isTokenValid } from '../utils/auth';
@@ -29,6 +31,9 @@ import LibroMayor from '../pages/LibroMayor/LibroMayor';
         <Route path="/detalle-libro/:asientoId" element={<DetalleLibro />} />
 
         <Route path="/libro-mayor" element={isTokenValid() ? <LibroMayor /> : <Navigate to="/login" />} />
+        
+        
+        <Route path="/balance-sumas" element={<BalanceSYS />} />
         <Route path="/balance-resultados" element={< BalanceResultado />} />
 
         <Route path="/balanceGeneral" element={<BalanceGeneral />} />
