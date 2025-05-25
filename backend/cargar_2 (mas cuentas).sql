@@ -13,7 +13,7 @@ VALUES ( 2025, 1, 12, 'EDITABLE');
 -- 2. Insertar cuentas contables (ya puede referenciar periodo_contable_id = 1)
 -- 1. Insertar período contable
 INSERT INTO periodos_contables (anio, mes_inicio, mes_fin, estado)
-VALUES (2025, 1, 12, 'EDITABLE');
+VALUES (2026, 1, 12, 'EDITABLE');
 
 -- 2. Insertar cuentas contables (estructura adaptada)
 INSERT INTO cuentas_contables (codigo, nombre, tipo, nivel, cuenta_padre_codigo, cuenta_padre_periodo_contable_id, periodo_contable_id, imputable, subtipo)
