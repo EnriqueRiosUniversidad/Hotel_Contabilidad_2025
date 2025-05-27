@@ -15,73 +15,40 @@ function LibroDiario() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api
-      .get(`/librodiario/${periodoId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+    const actualizar = localStorage.getItem("actualizarAsientos") === "true";
+    const cacheKey = "asientos_" + periodoId;
+
+    if (!actualizar && localStorage.getItem(cacheKey)) {
+      setAsientos(JSON.parse(localStorage.getItem(cacheKey)));
+    } else {
+      cargarAsientos();
+    }
+  }, []);
+
+  const cargarAsientos = () => {
+    api.get(`/librodiario/${periodoId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        setAsientos(res.data);
+        localStorage.setItem("asientos_" + periodoId, JSON.stringify(res.data));
+        localStorage.setItem("actualizarAsientos", "false");
       })
-      .then((res) => setAsientos(res.data))
       .catch((err) => console.error("Error al obtener asientos:", err));
-  }, [periodoId]);
-
-  const filtrado = asientos.filter((item) =>
-    item.fecha.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(filtrado);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "LibroDiario");
-    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, "LibroDiario.xlsx");
-  };
-
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("Libro Diario", 14, 15);
-    doc.autoTable({
-      startY: 25,
-      head: [["#", "Tipo", "Fecha", "Descripción", "Total"]],
-      body: filtrado.map((item) => [
-        item.id,
-        item.tipoAsiento,
-        item.fecha,
-        item.descripcion,
-        item.total,
-      ]),
-      theme: "striped",
-      styles: { fontSize: 10 },
-    });
-    doc.save("LibroDiario.pdf");
-  };
-
-  const exportToXML = () => {
-    let xml = "<?xml version='1.0' encoding='UTF-8'?>\n<LibroDiario>\n";
-    filtrado.forEach((item) => {
-      xml += "  <Item>\n";
-      Object.keys(item).forEach((key) => {
-        if (key !== "asiento") {
-          xml += `    <${key}>${item[key]}</${key}>\n`;
-        }
-      });
-      xml += "  </Item>\n";
-    });
-    xml += "</LibroDiario>";
-    const blob = new Blob([xml], { type: "application/xml" });
-    saveAs(blob, "LibroDiario.xml");
   };
 
   const handleEliminar = (id) => {
-    if (!window.confirm("¿Está seguro de que desea eliminar este registro?")) return;
-    api
-      .delete(`/librodiario/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+    if (!window.confirm("¿Seguro que quieres eliminar este asiento?")) return;
+
+    api.delete(`/librodiario/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(() => {
+        alert("Asiento eliminado correctamente");
+        setAsientos((prev) => prev.filter((a) => a.id !== id));
+        localStorage.setItem("actualizarAsientos", "true");
       })
-      .then(() => setAsientos(asientos.filter((a) => a.id !== id)))
-      .catch((err) => console.error("Error al eliminar asiento:", err));
+      .catch(() => alert("Error al eliminar el asiento"));
   };
 
   return (
@@ -142,24 +109,9 @@ function LibroDiario() {
                 <td>{asiento.descripcion}</td>
                 <td>{asiento.tipoAsiento}</td>
                 <td>
-                  <button
-                    className="btn btn-info btn-sm me-1"
-                    onClick={() => navigate(`/detalle-libro/${asiento.id}`)}
-                  >
-                    Ver
-                  </button>
-                  <button
-                    className="btn btn-outline-primary btn-sm me-1"
-                    onClick={() => navigate("/editar-libro", { state: { registro: asiento } })}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    className="btn btn-outline-danger btn-sm"
-                    onClick={() => handleEliminar(asiento.id)}
-                  >
-                    Eliminar
-                  </button>
+                  <button className="btn btn-info btn-sm me-1" onClick={() => navigate(`/detalle-libro/${asiento.id}`)}>Ver</button>
+                  <button className="btn btn-warning btn-sm me-1" onClick={() => navigate(`/agregar-libro/${asiento.id}`)}>Editar</button>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleEliminar(asiento.id)}>Eliminar</button>
                 </td>
               </tr>
             ))}

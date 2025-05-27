@@ -1,77 +1,132 @@
-// src/pages/BalanceSYS.jsx
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
-import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
+
+
+
+
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
+
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import api from "../../api/axios";
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const BalanceSYS = () => {
   const [registros, setRegistros] = useState([]);
-  const [periodoId, setPeriodoId] = useState("1");
+  const [periodoId, setPeriodoId] = useState(() => localStorage.getItem("periodoId") || "1");
+  const [mostrarReporte, setMostrarReporte] = useState(false);
+
+  const cargarDatos = () => {
+    const token = localStorage.getItem("auth_token");
+    api.get(`/libro-mayor/balance-sumas-saldos/${periodoId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(res => {
+      setRegistros(res.data);
+    }).catch(err => {
+      console.error("Error al cargar balance:", err);
+      alert("Error al cargar el Balance de Sumas y Saldos.");
+    });
+  };
 
   useEffect(() => {
-    const datosIniciales = [
-      { cuenta: "Caja", debe: 5000, haber: 5000 },
-      { cuenta: "Mercaderías", debe: 4000, haber: 6000 },
-      { cuenta: "Deudores por ventas" },
-      { cuenta: "Documentos a cobrar", debe: 3500, haber: 3500 },
-      { cuenta: "Banco Litoral c/c", debe: 12400, haber: 3950, saldoDebe: 8450 },
-      { cuenta: "Intereses Perdidos", debe: 10, perdidas: 10 },
-      { cuenta: "Inmuebles", debe: 7000, saldoDebe: 7000 },
-      { cuenta: "Proveedores", haber: 510, saldoHaber: 510 },
-      { cuenta: "Capital Social", haber: 20000, saldoHaber: 20000 },
-      { cuenta: "Valores a Depositar", debe: 7400, haber: 7400 },
-      { cuenta: "Descuentos Concedidos", debe: 100, saldoDebe: 100 },
-      { cuenta: "Ventas", haber: 4000, saldoHaber: 4000, ganancias: 4000 },
-      { cuenta: "CMV", debe: 600, haber: 600 },
-      { cuenta: "Gtos. Com. Brías", debe: 50 },
-      { cuenta: "Hipotecas a Pagar", haber: 2000 },
-      { cuenta: "Obligaciones a pagar", haber: 500, saldoHaber: 500 },
-      { cuenta: "Rodados", debe: 2000, saldoDebe: 2000 }
-    ];
-
-    setRegistros(datosIniciales);
-  }, []);
+    cargarDatos();
+  }, [periodoId]);
 
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(registros);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Balance");
-    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    saveAs(blob, "BalanceDeSumaYSaldo.xlsx");
-  };
+  const headers = [
+    "codigo",
+    "cuenta",
+    "debe",
+    "haber",
+    "saldoDebe",
+    "saldoHaber",
+  ];
+
+  // Datos + totales
+  const data = registros.map(r => [
+    r.codigo,
+    r.cuenta,
+    r.debe || 0,
+    r.haber || 0,
+    r.saldoDebe || 0,
+    r.saldoHaber || 0,
+  ]);
+
+  // Calcular totales
+  const totalDebe = data.reduce((acc, r) => acc + r[2], 0);
+  const totalHaber = data.reduce((acc, r) => acc + r[3], 0);
+  const totalSaldoDebe = data.reduce((acc, r) => acc + r[4], 0);
+  const totalSaldoHaber = data.reduce((acc, r) => acc + r[5], 0);
+
+  data.push([
+    "Totales",
+    "",
+    totalDebe,
+    totalHaber,
+    totalSaldoDebe,
+    totalSaldoHaber,
+  ]);
+
+  // Crear hoja
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+
+  // Opcional: ajustar ancho de columnas
+  worksheet["!cols"] = [
+    { wch: 12 },
+    { wch: 30 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+  ];
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Balance");
+
+  const excelBuffer = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array",
+  });
+  const dataBlob = new Blob([excelBuffer], {
+    type: "application/octet-stream",
+  });
+  saveAs(dataBlob, "BalanceDeSumasYSaldos.xlsx");
+};
 
   const exportToPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("Balance de Sumas y Saldos", 14, 15);
-    doc.autoTable({
-      startY: 25,
-      head: [[
-        "#", "NOMBRE DE LAS CUENTAS", "Debe", "Haber", "Saldo Debe", "Saldo Haber",
-        "Activo", "P + PN", "Pérdidas", "Ganancias"
-      ]],
-      body: registros.map((item, index) => [
-        index + 1,
-        item.cuenta,
-        item.debe || "",
-        item.haber || "",
-        item.saldoDebe || "",
-        item.saldoHaber || "",
-        item.saldoDebe || "",
-        item.saldoHaber || "",
-        item.perdidas || "",
-        item.ganancias || "",
-      ]),
-      styles: { fontSize: 8 },
-      theme: "grid",
-    });
-    doc.save("BalanceDeSumaYSaldo.pdf");
-  };
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text("Balance de Sumas y Saldos", 14, 15);
+  autoTable(doc, {
+    startY: 25,
+    head: [["#", "CUENTA", "Debe", "Haber", "Saldo Debe", "Saldo Haber"]],
+    body: registros.map((item, index) => [
+      index + 1,
+      item.cuenta,
+      item.debe || "",
+      item.haber || "",
+      item.saldoDebe || "",
+      item.saldoHaber || "",
+    ]),
+    styles: { fontSize: 8 },
+    theme: "grid",
+  });
+  doc.save("BalanceDeSumaYSaldo.pdf");
+};
+
 
   const exportToXML = () => {
     let xml = "<?xml version='1.0' encoding='UTF-8'?>\n<Balance>\n";
@@ -91,61 +146,90 @@ const BalanceSYS = () => {
   const totalHaber = registros.reduce((sum, r) => sum + (r.haber || 0), 0);
   const totalSaldoDebe = registros.reduce((sum, r) => sum + (r.saldoDebe || 0), 0);
   const totalSaldoHaber = registros.reduce((sum, r) => sum + (r.saldoHaber || 0), 0);
-  const totalGanancias = registros.reduce((sum, r) => sum + (r.ganancias || 0), 0);
-  const totalPerdidas = registros.reduce((sum, r) => sum + (r.perdidas || 0), 0);
+
+  const resultadoEjercicio = totalSaldoDebe - totalSaldoHaber;
+
+  const resultadoStyle = {
+    color: resultadoEjercicio >= 0 ? 'green' : 'red',
+    fontWeight: 'bold'
+  };
+
+  const chartData = {
+    labels: registros.map(r => r.cuenta),
+    datasets: [
+      {
+        label: 'Debe',
+        backgroundColor: 'rgba(151, 209, 43, 0.6)',
+        data: registros.map(r => r.debe || 0),
+      },
+      {
+        label: 'Haber',
+        backgroundColor: 'rgba(75, 112, 236, 0.6)',
+        data: registros.map(r => r.haber || 0),
+      },
+    ]
+  };
 
   return (
     <div className="d-flex">
       <Navbar />
       <div className="container py-3" style={{ marginLeft: "270px" }}>
-        <div className= "d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex justify-content-between align-items-center mb-3">
           <h4 className="mb-3">Balance de Sumas y Saldos</h4>
           <div className="d-inline-flex gap-3 align-items-center">
             <div>
-              <label htmlFor="periodo" className="form-label">Seleccionar Período Contable</label>
+              <label htmlFor="periodo" className="form-label">Seleccionar Período</label>
               <select
                 id="periodo"
-                className="form-select form-select-sm d-inline-block"
+                className="form-select form-select-sm"
                 value={periodoId}
-                onChange={(e) => setPeriodoId(e.target.value)}
+                onChange={(e) => {
+                  setPeriodoId(e.target.value);
+                  localStorage.setItem("periodoId", e.target.value);
+                }}
               >
-                <option value="1">2025 - Enero a Diciembre</option>
-                <option value="2">2024 - Enero a Diciembre</option>
+                <option value="1">2025 - Ene a Dic</option>
+                <option value="2">2024 - Ene a Dic</option>
               </select>
             </div>
             <div>
               <select
-                className="form-select form-select-sm d-inline-block"
+                className="form-select form-select-sm"
                 onChange={(e) => {
-                  if (e.target.value === "excel") exportToExcel();
-                  if (e.target.value === "pdf") exportToPDF();
-                  if (e.target.value === "xml") exportToXML();
+                  const value = e.target.value;
+                  if (value === "excel") exportToExcel();
+                  if (value === "pdf") exportToPDF();
+                  if (value === "xml") exportToXML();
+                  e.target.selectedIndex = 0;
                 }}
               >
                 <option value="">Exportar</option>
-                <option value="excel">Exportar a Excel</option>
-                <option value="pdf">Exportar a PDF</option>
-                <option value="xml">Exportar a XML</option>
+                <option value="excel">Excel</option>
+                <option value="pdf">PDF</option>
+                <option value="xml">XML</option>
               </select>
+              <button type="button" className="btn btn-link" onClick={() => setMostrarReporte(!mostrarReporte)}>
+                Ver Gráfico
+              </button>
             </div>
           </div>
         </div>
+
+        {mostrarReporte && (
+          <div className="mb-4">
+            <Bar data={chartData} />
+          </div>
+        )}
+
         <table className="table table-bordered text-center align-middle">
           <thead className="table-success">
             <tr>
               <th>#</th>
-              <th>NOMBRE DE LAS CUENTAS</th>
-              <th colSpan={2}>SUMAS</th>
-              <th colSpan={2}>SALDOS</th>
-              <th colSpan={2}>CTAS. PATRIMONIALES</th>
-              <th colSpan={2}>CTAS. RESULTADO</th>
-            </tr>
-            <tr>
-              <th></th><th></th>
-              <th>Debe</th><th>Haber</th>
-              <th>Debe</th><th>Haber</th>
-              <th>Activo</th><th>P + PN</th>
-              <th>Pérdidas</th><th>Ganancias</th>
+              <th>CUENTA</th>
+              <th>Debe</th>
+              <th>Haber</th>
+              <th>Saldo Debe</th>
+              <th>Saldo Haber</th>
             </tr>
           </thead>
           <tbody>
@@ -153,14 +237,10 @@ const BalanceSYS = () => {
               <tr key={i}>
                 <td>{i + 1}</td>
                 <td>{item.cuenta}</td>
-                <td>{item.debe || ""}</td>
-                <td>{item.haber || ""}</td>
-                <td>{item.saldoDebe || ""}</td>
-                <td>{item.saldoHaber || ""}</td>
-                <td>{item.saldoDebe || ""}</td>
-                <td>{item.saldoHaber || ""}</td>
-                <td>{item.perdidas || ""}</td>
-                <td>{item.ganancias || ""}</td>
+                <td>{item.debe}</td>
+                <td>{item.haber}</td>
+                <td>{item.saldoDebe}</td>
+                <td>{item.saldoHaber}</td>
               </tr>
             ))}
             <tr className="table-info">
@@ -169,14 +249,10 @@ const BalanceSYS = () => {
               <td>{totalHaber}</td>
               <td>{totalSaldoDebe}</td>
               <td>{totalSaldoHaber}</td>
-              <td>{totalSaldoDebe}</td>
-              <td>{totalSaldoHaber}</td>
-              <td>{totalPerdidas}</td>
-              <td>{totalGanancias}</td>
             </tr>
             <tr className="table-success">
-              <td colSpan={8} className="text-end"><strong>Resultados del ejercicio</strong></td>
-              <td colSpan={2}><strong>{totalGanancias - totalPerdidas}</strong></td>
+              <td colSpan={5} className="text-end"><strong>Resultado del ejercicio</strong></td>
+              <td style={resultadoStyle}>{resultadoEjercicio}</td>
             </tr>
           </tbody>
         </table>

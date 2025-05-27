@@ -6,14 +6,13 @@ import { Routes, Route, Navigate } from 'react-router-dom';
   import LibroDiario from '../pages/LibroDiario/LibroDiario';
   import AgregarLibro from '../pages/LibroDiario/AgregarLibro';
   import DetalleLibro from '../pages/LibroDiario/DetalleLibro';
+
+import LibroMayor from '../pages/LibroMayor/LibroMayor';
   
 
-  
   import BalanceSYS from '../pages/BalanceSYS/BalanceSYS';
   import BalanceGeneral from '../pages/BalanceGeneral/BalanceGeneral';
-  import BalanceResulado from '../pages/BalanceResultado/BalanceResultado';
-
-
+  import BalanceResultado from '../pages/BalanceResultado/BalanceResultado';
   import { isTokenValid } from '../utils/auth';
   import LibroMayor from '../pages/LibroMayor/LibroMayor';
 
@@ -27,11 +26,16 @@ import { Routes, Route, Navigate } from 'react-router-dom';
         <Route path="/cuentas" element={isTokenValid() ? <AgregarCuenta /> : <Navigate to="/login" />} />
         <Route path="/libro-diario" element={<LibroDiario />} />
         <Route path="/agregar-libro" element={<AgregarLibro />} />
+        <Route path="/agregar-libro/:id" element={<AgregarLibro />} />
         <Route path="/detalle-libro/:asientoId" element={<DetalleLibro />} />
+
+        <Route path="/libro-mayor" element={isTokenValid() ? <LibroMayor /> : <Navigate to="/login" />} />
+        
+        
         <Route path="/balance-sumas" element={<BalanceSYS />} />
+        <Route path="/balance-resultados" element={< BalanceResultado />} />
+
         <Route path="/balanceGeneral" element={<BalanceGeneral />} />
-        <Route path="/libro-mayor" element={<LibroMayor />} />
-        <Route path="/balance-resultados" element={<BalanceResulado />} />
       </Routes>
     );
   }

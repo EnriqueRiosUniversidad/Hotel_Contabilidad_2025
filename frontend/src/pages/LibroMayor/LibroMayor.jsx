@@ -1,118 +1,204 @@
-import { useState, useEffect } from "react";
-import CuentaMayorCard from "./CuentaMayorCard";
-import ExportDropdown from "./ExportDropdown";
+import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
-
+import api from "../../api/axios";
 
 const LibroMayor = () => {
   const [cuentas, setCuentas] = useState([]);
-  const [busqueda, setBusqueda] = useState("");
-  const [pagina, setPagina] = useState(1);
-  const porPagina = 6;
+  const [filtrados, setFiltrados] = useState([]);
+  const [periodoId] = useState(() => localStorage.getItem("periodoId") || "1");
 
-  useEffect(() => {
-    const datos = [
-      {
-        codigo: "32",
-        nombre: "Proveedores",
-        movimientos: [
-          { fecha: "15/09/2025", concepto: "Compra de Toallas", debe: 72.6, haber: 0, saldo: 72.6 },
-          { fecha: "30/10/2025", concepto: "Pago al proveedor", debe: 0, haber: 72.6, saldo: 0 },
-        ],
-      },
-      {
-        codigo: "321",
-        nombre: "Bancos",
-        movimientos: [
-          { fecha: "15/09/2025", concepto: "Cobro al cliente", debe: 96.8, haber: 0, saldo: 96.8 },
-          { fecha: "16/09/2025", concepto: "Pago transporte", debe: 0, haber: 6.05, saldo: 90.75 },
-          { fecha: "30/10/2025", concepto: "Pago al proveedor", debe: 0, haber: 72.6, saldo: 18.15 },
-        ],
-      },
-      {
-        codigo: "20",
-        nombre: "Compras de Mercadería",
-        movimientos: [
-          { fecha: "15/09/2025", concepto: "Compra de Almohadas", debe: 72.6, haber: 0, saldo: 72.6 },
-          { fecha: "30/10/2025", concepto: "Pago al proveedor", debe: 0, haber: 72.6, saldo: 0 },
-        ],
-      },
-      {
-        codigo: "32",
-        nombre: "Proveedores",
-        movimientos: [
-          { fecha: "15/09/2025", concepto: "Compra de Sabanas y edredones", debe: 72.6, haber: 0, saldo: 72.6 },
-          { fecha: "30/10/2025", concepto: "Pago al proveedor", debe: 0, haber: 72.6, saldo: 0 },
-        ],
-      },
-      {
-        codigo: "32",
-        nombre: "Proveedores",
-        movimientos: [
-          { fecha: "15/09/2025", concepto: "Compra de Productos De Limpieza", debe: 72.6, haber: 0, saldo: 72.6 },
-          { fecha: "30/10/2025", concepto: "Pago al proveedor", debe: 0, haber: 72.6, saldo: 0 },
-        ],
-      },
-      {
-        codigo: "32",
-        nombre: "Proveedores",
-        movimientos: [
-          { fecha: "15/09/2025", concepto: "Compra de Electrodomesticos", debe: 72.6, haber: 0, saldo: 72.6 },
-          { fecha: "30/10/2025", concepto: "Pago al proveedor", debe: 0, haber: 72.6, saldo: 0 },
-        ],
-      },
-    ];
-    setCuentas(datos);
-  }, []);
+  const [codigo, setCodigo] = useState("");
+  const [desde, setDesde] = useState("");
+  const [hasta, setHasta] = useState("");
+  const [sugerencias, setSugerencias] = useState([]);
+  const [cuentaSeleccionada, setCuentaSeleccionada] = useState(null);
+  const [mostrarTodas, setMostrarTodas] = useState(false);
 
-  const cuentasFiltradas = cuentas.filter(c =>
-    c.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-    c.codigo.includes(busqueda)
+  const handleInputCodigo = (e) => {
+    const valor = e.target.value;
+    setCodigo(valor);
+    const key = "cuentas_" + periodoId;
+    const cache = JSON.parse(localStorage.getItem(key) || "[]");
+    const sugeridas = cache.filter(c =>
+      c.codigo.toLowerCase().startsWith(valor.toLowerCase()) && c.imputable
+    );
+    setSugerencias(sugeridas);
+  };
+
+  const seleccionarCuenta = (cuenta) => {
+    setCodigo(cuenta.codigo);
+    setCuentaSeleccionada(cuenta);
+    setSugerencias([]);
+  };
+
+  const buscarUnaCuenta = () => {
+    const token = localStorage.getItem("auth_token");
+    if (!codigo || !desde || !hasta) {
+      alert("Completá código y fechas.");
+      return;
+    }
+
+    setMostrarTodas(false);
+    api.get(`/libro-mayor/cuenta`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { periodoId, codigo, desde, hasta }
+    })
+      .then(res => setFiltrados(res.data))
+      .catch(err => {
+        console.error("Error:", err);
+        alert("No se pudo filtrar la cuenta.");
+      });
+  };
+
+  const buscarTodasLasCuentas = () => {
+    const token = localStorage.getItem("auth_token");
+    if (!desde || !hasta) {
+      alert("Completá las fechas.");
+      return;
+    }
+
+    setMostrarTodas(true);
+    api.get(`/libro-mayor/${periodoId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { desde, hasta } // backend puede ignorar si aún no filtra por fecha
+    })
+      .then(res => setCuentas(res.data))
+      .catch(err => {
+        console.error("Error al cargar todas:", err);
+        alert("No se pudo cargar el Libro Mayor.");
+      });
+  };
+
+  const renderTabla = (datos, totalDebe, totalHaber, saldo) => (
+    <table className="table table-bordered text-center align-middle">
+      <thead style={{ backgroundColor: "#d4ede1", fontWeight: "bold" }}>
+        <tr>
+          <th>Fecha</th>
+          <th>Descripción</th>
+          <th>Debe</th>
+          <th>Haber</th>
+        </tr>
+      </thead>
+      <tbody>
+        {datos.map((r, i) => (
+          <tr key={i}>
+            <td>{r.fecha}</td>
+            <td>{r.descripcion}</td>
+            <td>{r.debe?.toLocaleString() || 0}</td>
+            <td>{r.haber?.toLocaleString() || 0}</td>
+          </tr>
+        ))}
+        <tr style={{ backgroundColor: "#f8edc6", fontWeight: "bold" }}>
+          <td colSpan="2">Totales</td>
+          <td>{totalDebe.toLocaleString()}</td>
+          <td>{totalHaber.toLocaleString()}</td>
+        </tr>
+        <tr style={{ backgroundColor: "#d8f3f9", fontWeight: "bold" }}>
+          <td colSpan="3">Saldo</td>
+          <td style={{ color: saldo >= 0 ? "green" : "red" }}>
+            {saldo.toLocaleString()}
+          </td>
+        </tr>
+      </tbody>
+    </table>
   );
 
-  const totalPaginas = Math.ceil(cuentasFiltradas.length / porPagina);
-  const cuentasPaginadas = cuentasFiltradas.slice((pagina - 1) * porPagina, pagina * porPagina);
+  const renderFiltrada = () => {
+    const totalDebe = filtrados.reduce((acc, r) => acc + (r.debe || 0), 0);
+    const totalHaber = filtrados.reduce((acc, r) => acc + (r.haber || 0), 0);
+    const saldo = totalDebe - totalHaber;
+
+    return (
+      <div className="mb-5">
+        <h5 className="text-success mb-3 fs-5 fw-bold">
+          {codigo} - {cuentaSeleccionada?.nombre || ""}
+        </h5>
+        {renderTabla(filtrados, totalDebe, totalHaber, saldo)}
+      </div>
+    );
+  };
+
+  const renderTodas = () =>
+    cuentas.map((cuenta, i) => {
+      const movimientos = cuenta.movimientos || [];
+      const totalDebe = movimientos.reduce((acc, r) => acc + (r.debe || 0), 0);
+      const totalHaber = movimientos.reduce((acc, r) => acc + (r.haber || 0), 0);
+      const saldo = totalDebe - totalHaber;
+
+      return (
+        <div key={i} className="mb-5">
+          <h5 className="text-success mb-3 fs-5 fw-bold">
+            {cuenta.cuentaCodigo.codigo} - {cuenta.cuentaNombre}
+          </h5>
+          {renderTabla(movimientos, totalDebe, totalHaber, saldo)}
+        </div>
+      );
+    });
 
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container mt-4" style={{ marginLeft: "270px" }}>
-        <h2 className="text-center mb-3">Libro Mayor</h2>
+      <div className="container py-4" style={{ marginLeft: "270px" }}>
+        <h4 className="mb-4">📗 Libro Mayor</h4>
 
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <input
-            type="text"
-            className="form-control w-50"
-            placeholder="Cuenta..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-          />
-          <ExportDropdown data={cuentasFiltradas} />
-        </div>
-
-        <div className="row">
-          {cuentasPaginadas.map((cuenta, idx) => (
-            <div key={idx} className="col-md-6 mb-4">
-              <CuentaMayorCard cuenta={cuenta} />
+        {/* FILTRO */}
+        <div className="mb-4">
+          <h5>🔎 Filtros</h5>
+          <div className="row g-2 align-items-center">
+            <div className="col-md-3 position-relative">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Código de cuenta"
+                value={codigo}
+                onChange={handleInputCodigo}
+              />
+              {sugerencias.length > 0 && (
+                <ul className="list-group position-absolute w-100 z-3">
+                  {sugerencias.map((c) => (
+                    <li
+                      key={c.codigo}
+                      className="list-group-item list-group-item-action"
+                      onClick={() => seleccionarCuenta(c)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      {c.codigo} - {c.nombre}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          ))}
+            <div className="col-md-2">
+              <input
+                type="date"
+                className="form-control"
+                value={desde}
+                onChange={(e) => setDesde(e.target.value)}
+              />
+            </div>
+            <div className="col-md-2">
+              <input
+                type="date"
+                className="form-control"
+                value={hasta}
+                onChange={(e) => setHasta(e.target.value)}
+              />
+            </div>
+            <div className="col-md-2">
+              <button className="btn btn-primary w-100" onClick={buscarUnaCuenta}>
+                Buscar cuenta
+              </button>
+            </div>
+            <div className="col-md-3">
+              <button className="btn btn-outline-success w-100" onClick={buscarTodasLasCuentas}>
+                Mostrar todas las cuentas
+              </button>
+            </div>
+          </div>
         </div>
 
-        {totalPaginas > 1 && (
-          <div className="text-center my-3">
-            <nav>
-              <ul className="pagination justify-content-center">
-                {Array.from({ length: totalPaginas }, (_, i) => (
-                  <li key={i} className={`page-item ${pagina === i + 1 ? 'active' : ''}`}>
-                    <button className="page-link" onClick={() => setPagina(i + 1)}>
-                      {i + 1}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-        )}
+        {/* RESULTADOS */}
+        {mostrarTodas ? renderTodas() : filtrados.length > 0 && renderFiltrada()}
       </div>
     </div>
   );

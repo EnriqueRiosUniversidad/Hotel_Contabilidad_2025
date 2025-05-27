@@ -33,7 +33,7 @@ function Navbar() {
             
           >
               <img
-              src="Home-icon.jpeg"
+              src="Home-icon.png"
               alt="Agregar"
               style={{ width: '25px', height: '25px', marginRight: '10px' }}
             />
