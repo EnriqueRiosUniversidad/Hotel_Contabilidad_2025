@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { saveToken } from '../utils/auth';
 import config from '../config';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -9,7 +8,6 @@ function Login() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,7 +22,9 @@ function Login() {
       if (!res.ok) throw new Error('Credenciales inválidas');
       const data = await res.json();
       saveToken(data.token);
-      navigate('/');
+
+      // Forzar recarga para que isTokenValid() detecte el token
+      window.location.href = '/';
     } catch (err) {
       setError(err.message);
     }

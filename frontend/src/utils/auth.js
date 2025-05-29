@@ -15,8 +15,6 @@ export function getToken() {
 // Elimina el token y redirige al login
 export function logout() {
   localStorage.removeItem(TOKEN_KEY);
-
-  window.location.href = '/login';
   localStorage.removeItem("periodoId");
   window.location.href = '/login';
   

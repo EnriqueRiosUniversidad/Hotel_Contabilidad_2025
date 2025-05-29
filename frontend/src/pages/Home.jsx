@@ -5,6 +5,39 @@ import { getToken } from '../utils/auth';
 
 function Home() {
   const [periodoId, setPeriodoId] = useState(() => localStorage.getItem("periodoId") || "1");
+  const [periodos, setPeriodos] = useState([]);
+
+  const mesNombre = (mes) => {
+    const meses = [
+      "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+      "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    return meses[mes - 1] || "Mes inválido";
+  };
+
+  useEffect(() => {
+    const token = getToken();
+
+    api.get('/plancuentas/periodos', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        const periodosData = res.data?.filter(p => p?.periodoId && p?.anio) || [];
+        setPeriodos(periodosData);
+
+        const existe = periodosData.some(p => p.periodoId?.toString() === periodoId);
+        if (periodosData.length > 0 && !existe) {
+          const nuevoId = periodosData[0].periodoId.toString();
+          if (periodoId !== nuevoId) {
+            setPeriodoId(nuevoId);
+            localStorage.setItem("periodoId", nuevoId);
+          }
+        }
+      })
+      .catch(err => {
+        console.error("Error al obtener períodos:", err);
+      });
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("periodoId", periodoId);
@@ -44,8 +77,11 @@ function Home() {
             value={periodoId}
             onChange={(e) => setPeriodoId(e.target.value)}
           >
-            <option value="1">2025 - Enero a Diciembre</option>
-            <option value="2">2026 - Enero a Diciembre</option>
+            {periodos.map((p) => (
+              <option key={p.periodoId} value={p.periodoId}>
+                {p.anio} - {mesNombre(p.mesInicio)} a {mesNombre(p.mesFin)}
+              </option>
+            ))}
           </select>
         </div>
       </div>
