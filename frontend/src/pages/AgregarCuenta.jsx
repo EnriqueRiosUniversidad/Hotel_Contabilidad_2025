@@ -13,17 +13,33 @@ function AgregarCuenta() {
 
   const tipos = ['ACTIVO', 'PASIVO', 'PATRIMONIO', 'INGRESO', 'EGRESO'];
 
-  useEffect(() => { fetchCuentas(); }, []);
+  useEffect(() => {
+    const periodoId = localStorage.getItem("periodoId");
+    const key = "cuentas_" + periodoId;
+    const cached = localStorage.getItem(key);
+  
+    if (cached) {
+      setCuentas(JSON.parse(cached));
+    } else {
+      fetchCuentas(periodoId);
+    }
+  }, []);
+  
 
-  const fetchCuentas = async () => {
+  const fetchCuentas = async (periodoId) => {
     try {
-      const res = await fetch(`${config.apiBaseUrl}/plancuentas/`, {
+      const res = await fetch(`${config.apiBaseUrl}/plancuentas/plan/${periodoId}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       const data = await res.json();
       setCuentas(data);
-    } catch (err) { alert('Error al obtener cuentas'); }
+      localStorage.setItem("cuentas_" + periodoId, JSON.stringify(data));
+    } catch (err) {
+      alert("Error al obtener cuentas");
+    }
   };
+  
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -94,7 +110,7 @@ function AgregarCuenta() {
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container mt-4" style={{ marginLeft: '270px' }}>
+      <div className="container mt-4" style={{ marginLeft: '250px' }}>
         <h2 className="mb-3 texto-principal">{seleccionada ? 'Editar Cuenta' : 'Agregar Cuenta Contable'}</h2>
         <form className="p-4 rounded shadow mb-4 bg-success bg-opacity-25" onSubmit={handleSubmit}>
           <div className="row mb-3">
@@ -167,4 +183,4 @@ function AgregarCuenta() {
   );
 }
 
-export default AgregarCuenta;
+export default AgregarCuenta

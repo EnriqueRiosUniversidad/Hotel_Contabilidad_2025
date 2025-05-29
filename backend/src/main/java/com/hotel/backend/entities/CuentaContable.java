@@ -3,6 +3,7 @@
     import jakarta.persistence.*;
     import lombok.*;
 
+
     @Entity
     @Table(name = "cuentas_contables")
     @Data
@@ -21,7 +22,14 @@
         @Enumerated(EnumType.STRING)
         private TipoCuenta tipo;
 
+        @Enumerated(EnumType.STRING)
+        @Column(nullable = false)
+        private SubtipoCuenta subtipo = SubtipoCuenta.NO_CLASIFICADO;
+
         private Integer nivel;
+
+        @Column(nullable = false)
+        private boolean imputable;
 
         @ManyToOne
         @JoinColumns({
@@ -35,3 +43,4 @@
         @JoinColumn(name = "periodo_contable_id")
         private PeriodoContable periodoContable;
     }
+

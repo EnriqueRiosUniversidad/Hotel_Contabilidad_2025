@@ -1,8 +1,11 @@
 package com.hotel.backend.services;
 
+import com.hotel.backend.DTOs.CuentaBalanceDTO;
 import com.hotel.backend.DTOs.CuentaContableDTO;
+import com.hotel.backend.DTOs.PeriodoContableDTO;
 import com.hotel.backend.entities.*;
 import com.hotel.backend.repository.CuentasContables_Repository;
+import com.hotel.backend.repository.DetalleAsientoRepository;
 import com.hotel.backend.repository.PeriodoContable_Repository;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,7 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,8 +29,11 @@ import java.util.stream.Collectors;
 public class Cuenta_Service {
 
     private final CuentasContables_Repository cuentasContables_Repository;
-    private final PeriodoContable_Repository periodoContable_Repository;
+
+    private final DetalleAsientoRepository detalleAsientoRepository;
     private final ModelMapper mapper = new ModelMapper();
+
+    private final PeriodoContable_Repository periodoContable_Repository;
 
     @PostConstruct
     public void configurarMapper() {
@@ -40,6 +50,8 @@ public class Cuenta_Service {
             mapper.map(src -> src.getPeriodoContable().getPeriodoId(), CuentaContableDTO::setPeriodoContableId);
         });
     }
+
+
 
     @Transactional
     public CuentaContableDTO getByIdCuenta(String codigo, Integer periodoId) {
@@ -67,7 +79,7 @@ public class Cuenta_Service {
 
     @Transactional
     public List<CuentaContableDTO> getByPlan(Integer periodoContableId) {
-        List<CuentaContable> cuentas = cuentasContables_Repository.findByPeriodoContable_PeriodoId(periodoContableId);
+        List<CuentaContable> cuentas = cuentasContables_Repository.findById_PeriodoContableId(periodoContableId);
         return cuentas.stream()
                 .map(c -> mapper.map(c, CuentaContableDTO.class))
                 .collect(Collectors.toList());
@@ -127,7 +139,6 @@ public class Cuenta_Service {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Cuenta contable no encontrada para actualización."));
 
-        // Solo actualiza si los valores no son nulos
         if (dto.getNombre() != null) {
             cuentaExistente.setNombre(dto.getNombre());
         }
@@ -137,8 +148,11 @@ public class Cuenta_Service {
         if (dto.getNivel() != null) {
             cuentaExistente.setNivel(dto.getNivel());
         }
+        if (dto.getSubtipo() != null) {  // ✅ nuevo
+            cuentaExistente.setSubtipo(dto.getSubtipo());
+        }
+        cuentaExistente.setImputable(dto.isImputable()); // ✅ nuevo
 
-        // Verificar y actualizar la cuenta padre si viene en el DTO
         if (dto.getCuentaPadreId() != null && dto.getCuentaPadrePeriodoId() != null) {
             if (!dto.getCuentaPadrePeriodoId().equals(dto.getPeriodoContableId())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -152,11 +166,14 @@ public class Cuenta_Service {
                             "Cuenta padre no encontrada (código: " + dto.getCuentaPadreId() + ")"));
 
             cuentaExistente.setCuentaPadre(cuentaPadre);
+        } else {
+            cuentaExistente.setCuentaPadre(null); // por si se desea eliminar la referencia
         }
 
         CuentaContable actualizada = cuentasContables_Repository.save(cuentaExistente);
         return mapper.map(actualizada, CuentaContableDTO.class);
     }
+
 
 
 
@@ -177,6 +194,44 @@ public class Cuenta_Service {
             throw new ResponseStatusException(HttpStatus.CONFLICT, mensaje);
         }
     }
+
+
+
+
+    //Balance General
+
+    public List<CuentaBalanceDTO> obtenerBalanceGeneral(Integer periodoId) {
+        List<CuentaContable> cuentas = cuentasContables_Repository
+                .findById_PeriodoContableId(periodoId)
+                .stream()
+                .filter(CuentaContable::isImputable)
+                .toList();
+
+        List<DetalleAsiento> detalles = detalleAsientoRepository.findByAsiento_Periodo_PeriodoId(periodoId);
+
+        Map<String, Double> saldos = new HashMap<>();
+
+        for (DetalleAsiento d : detalles) {
+            String clave = d.getCuenta().getId().getCodigo();
+            saldos.put(clave, saldos.getOrDefault(clave, 0.0) + d.getDebe() - d.getHaber());
+        }
+
+        return cuentas.stream()
+                .map(c -> {
+                    double saldo = saldos.getOrDefault(c.getId().getCodigo(), 0.0);
+                    if (saldo == 0.0) return null;
+                    CuentaBalanceDTO dto = new CuentaBalanceDTO();
+                    dto.setCuenta(c.getNombre());
+                    dto.setTipo(c.getTipo());
+                    dto.setSubtipo(c.getSubtipo());
+                    dto.setMonto(saldo);
+                    return dto;
+                })
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+
 
 
 }
