@@ -52,7 +52,50 @@ const LibroMayor = () => {
         alert("No se pudo filtrar la cuenta.");
       });
   };
+  const exportFiltradoToExcel = () => {
+  if (filtrados.length === 0) {
+    alert("No hay movimientos para exportar.");
+    return;
+  }
 
+  const datos = filtrados.map((item, index) => ({
+    Nro: index + 1,
+    Fecha: item.fecha,
+    Descripción: item.descripcion,
+    Debe: parseFloat(item.debe || 0),
+    Haber: parseFloat(item.haber || 0),
+  }));
+
+  const hoja = XLSX.utils.json_to_sheet(datos);
+  const libro = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(libro, hoja, "LibroMayor");
+  const buffer = XLSX.write(libro, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  saveAs(blob, `LibroMayor_${codigo}.xlsx`);
+};
+
+const exportFiltradoToXML = () => {
+  if (filtrados.length === 0) {
+    alert("No hay movimientos para exportar.");
+    return;
+  }
+
+  let xml = `<?xml version='1.0' encoding='UTF-8'?>\n<LibroMayor cuenta="${codigo}" nombre="${cuentaSeleccionada?.nombre || ''}">\n`;
+  filtrados.forEach((item) => {
+    xml += "  <Movimiento>\n";
+    xml += `    <Fecha>${item.fecha}</Fecha>\n`;
+    xml += `    <Descripcion>${item.descripcion}</Descripcion>\n`;
+    xml += `    <Debe>${item.debe}</Debe>\n`;
+    xml += `    <Haber>${item.haber}</Haber>\n`;
+    xml += "  </Movimiento>\n";
+  });
+  xml += "</LibroMayor>";
+
+  const blob = new Blob([xml], { type: "application/xml" });
+  saveAs(blob, `LibroMayor_${codigo}.xml`);
+};
   const buscarTodasLasCuentas = () => {
     const token = localStorage.getItem("auth_token");
     if (!desde || !hasta) {
@@ -63,7 +106,7 @@ const LibroMayor = () => {
     setMostrarTodas(true);
     api.get(`/libro-mayor/${periodoId}`, {
       headers: { Authorization: `Bearer ${token}` },
-      params: { desde, hasta } // backend puede ignorar si aún no filtra por fecha
+      params: { desde, hasta } 
     })
       .then(res => setCuentas(res.data))
       .catch(err => {
@@ -199,7 +242,18 @@ const LibroMayor = () => {
             </div>
           </div>
         </div>
-
+      <div className="d-flex justify-content-end mb-3">
+  <select
+    className="form-select form-select-sm w-auto"
+    onChange={(e) => {
+      if (e.target.value === "excel") exportFiltradoToExcel();
+      if (e.target.value === "xml") exportFiltradoToXML();
+    }}
+  >
+    <option value="excel">Exportar a Excel</option>
+    <option value="xml">Exportar a XML</option>
+  </select>
+</div>
         {/* RESULTADOS */}
         {mostrarTodas ? renderTodas() : filtrados.length > 0 && renderFiltrada()}
       </div>
