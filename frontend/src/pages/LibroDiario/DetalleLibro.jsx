@@ -25,7 +25,7 @@ function DetalleLibro() {
     <div className="d-flex">
       <Navbar />
       <div className="flex-grow-1 p-4" style={{ marginLeft: "250px" }}>
-        <h2>Detalle del Asiento</h2>
+        <h2 className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>Detalle del Asiento</h2>
         <p><strong>Fecha:</strong> {asiento.fecha}</p>
         <p><strong>Descripción:</strong> {asiento.descripcion}</p>
         <p><strong>Tipo:</strong> {asiento.tipoAsiento}</p>

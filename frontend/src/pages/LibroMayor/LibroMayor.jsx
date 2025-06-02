@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useState } from "react";
 import Navbar from "../../components/Navbar";
 import api from "../../api/axios";
 
@@ -13,6 +13,14 @@ const LibroMayor = () => {
   const [sugerencias, setSugerencias] = useState([]);
   const [cuentaSeleccionada, setCuentaSeleccionada] = useState(null);
   const [mostrarTodas, setMostrarTodas] = useState(false);
+
+  const formatearFecha = (fechaISO) => {
+    const fecha = new Date(fechaISO);
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+  };
 
   const handleInputCodigo = (e) => {
     const valor = e.target.value;
@@ -60,7 +68,7 @@ const LibroMayor = () => {
     setMostrarTodas(true);
     api.get(`/libro-mayor/${periodoId}`, {
       headers: { Authorization: `Bearer ${token}` },
-      params: { desde, hasta } // backend puede ignorar si aún no filtra por fecha
+      params: { desde, hasta }
     })
       .then(res => setCuentas(res.data))
       .catch(err => {
@@ -70,32 +78,32 @@ const LibroMayor = () => {
   };
 
   const renderTabla = (datos, totalDebe, totalHaber, saldo) => (
-    <table className="table table-bordered text-center align-middle">
+    <table className="table table-bordered text-start align-middle">
       <thead style={{ backgroundColor: "#d4ede1", fontWeight: "bold" }}>
         <tr>
-          <th>Fecha</th>
-          <th>Descripción</th>
-          <th>Debe</th>
-          <th>Haber</th>
+          <th className="text-start">Fecha</th>
+          <th className="text-start">Descripción</th>
+          <th className="text-start">Debe</th>
+          <th className="text-start">Haber</th>
         </tr>
       </thead>
       <tbody>
         {datos.map((r, i) => (
           <tr key={i}>
-            <td>{r.fecha}</td>
-            <td>{r.descripcion}</td>
-            <td>{r.debe?.toLocaleString() || 0}</td>
-            <td>{r.haber?.toLocaleString() || 0}</td>
+            <td className="text-start">{formatearFecha(r.fecha)}</td>
+            <td className="text-start">{r.descripcion}</td>
+            <td className="text-start">{r.debe?.toLocaleString() || 0}</td>
+            <td className="text-start">{r.haber?.toLocaleString() || 0}</td>
           </tr>
         ))}
         <tr style={{ backgroundColor: "#f8edc6", fontWeight: "bold" }}>
-          <td colSpan="2">Totales</td>
-          <td>{totalDebe.toLocaleString()}</td>
-          <td>{totalHaber.toLocaleString()}</td>
+          <td colSpan="2" className="text-start">Totales</td>
+          <td className="text-start">{totalDebe.toLocaleString()}</td>
+          <td className="text-start">{totalHaber.toLocaleString()}</td>
         </tr>
         <tr style={{ backgroundColor: "#d8f3f9", fontWeight: "bold" }}>
-          <td colSpan="3">Saldo</td>
-          <td style={{ color: saldo >= 0 ? "green" : "red" }}>
+          <td colSpan="3" className="text-start">Saldo</td>
+          <td className="text-start" style={{ color: saldo >= 0 ? "green" : "red" }}>
             {saldo.toLocaleString()}
           </td>
         </tr>
@@ -139,20 +147,24 @@ const LibroMayor = () => {
     <div className="d-flex">
       <Navbar />
       <div className="container py-4" style={{ marginLeft: "270px" }}>
-        <h4 className="mb-4">📗 Libro Mayor</h4>
+        <h2  className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>📗 Libro Mayor</h2>
 
-        {/* FILTRO */}
+        {/* FILTROS */}
         <div className="mb-4">
-          <h5>🔎 Filtros</h5>
+          
           <div className="row g-2 align-items-center">
             <div className="col-md-3 position-relative">
+               <div className="input-group">
+              <span className="input-group-text">🔍</span>
               <input
+              
                 type="text"
                 className="form-control"
                 placeholder="Código de cuenta"
                 value={codigo}
                 onChange={handleInputCodigo}
               />
+              </div>
               {sugerencias.length > 0 && (
                 <ul className="list-group position-absolute w-100 z-3">
                   {sugerencias.map((c) => (

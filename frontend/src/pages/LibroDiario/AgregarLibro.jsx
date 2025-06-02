@@ -135,7 +135,7 @@ function AgregarLibro() {
     <div className="d-flex">
       <Navbar />
       <div className="flex-grow-1 p-4" style={{ marginLeft: "250px" }}>
-        <h2>{esEdicion ? "Editar Asiento" : "Agregar Asiento Contable"}</h2>
+        <h2 className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>{esEdicion ? "Editar Asiento" : "Agregar Asiento Contable"}</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label>Fecha</label>
