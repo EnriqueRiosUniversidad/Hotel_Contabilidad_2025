@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import api from "../../api/axios";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 const LibroMayor = () => {
   const [cuentas, setCuentas] = useState([]);

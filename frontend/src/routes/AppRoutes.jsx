@@ -7,8 +7,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
   import AgregarLibro from '../pages/LibroDiario/AgregarLibro';
   import DetalleLibro from '../pages/LibroDiario/DetalleLibro';
 
-import LibroMayor from '../pages/LibroMayor/LibroMayor';
-  
+ 
 
   import BalanceSYS from '../pages/BalanceSYS/BalanceSYS';
   import BalanceGeneral from '../pages/BalanceGeneral/BalanceGeneral';
