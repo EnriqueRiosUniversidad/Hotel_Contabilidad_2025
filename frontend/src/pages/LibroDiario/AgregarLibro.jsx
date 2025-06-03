@@ -7,19 +7,19 @@ function AgregarLibro() {
   const { id } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("auth_token");
-  const periodoId = parseInt(localStorage.getItem("periodoId"));
+  const periodoId = localStorage.getItem("periodoId");
 
   const [asiento, setAsiento] = useState({
     fecha: "",
     descripcion: "",
     tipoAsiento: "REGULAR",
-    periodoId,
+    periodoId: parseInt(periodoId),
     detalles: [],
   });
 
   const [detalle, setDetalle] = useState({
     cuentaCodigo: "",
-    cuentaPeriodoContableId: periodoId,
+    cuentaPeriodoContableId: parseInt(periodoId),
     debe: 0,
     haber: 0,
   });
@@ -135,7 +135,7 @@ function AgregarLibro() {
     <div className="d-flex">
       <Navbar />
       <div className="flex-grow-1 p-4" style={{ marginLeft: "250px" }}>
-        <h2>{esEdicion ? "Editar Asiento" : "Agregar Asiento Contable"}</h2>
+        <h2 className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>{esEdicion ? "Editar Asiento" : "Agregar Asiento Contable"}</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label>Fecha</label>
@@ -147,7 +147,6 @@ function AgregarLibro() {
               required
             />
           </div>
-
           <div className="mb-3">
             <label>Descripción</label>
             <input
@@ -158,7 +157,6 @@ function AgregarLibro() {
               required
             />
           </div>
-
           <div className="mb-3">
             <label>Tipo</label>
             <select

@@ -74,26 +74,37 @@ function LibroDiario() {
     saveAs(blob, "LibroDiario.xml");
   };
 
+  const formatearFecha = (fechaISO) => {
+    const fecha = new Date(fechaISO);
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+  };
+
   return (
     <div className="d-flex">
       <Navbar />
       <div className="flex-grow-1 p-4" style={{ marginLeft: "250px" }}>
-        <h2>Libro Diario</h2>
+        <h2 className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>
+         📘 Libro Diario
+        </h2>
 
         <div className="d-flex justify-content-between align-items-end mb-3 flex-wrap gap-3">
-          <div>
-            <label htmlFor="buscar" className="form-label">Buscar Asiento</label>
-            <input
-              type="search"
-              id="buscar"
-              className="form-control"
-              placeholder="Buscar por descripción, tipo o cuenta"
-              onChange={(e) => setFiltro(e.target.value)}
-            />
+          <div className="col-md-4 text-center">
+            <div className="input-group">
+              <span className="input-group-text">🔍</span>
+              <input
+                type="search"
+                className="form-control"
+                placeholder="Buscar por fecha (dd/mm/yyyy)"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
           </div>
 
           <div>
-            <label className="form-label">Exportar</label>
             <select
               className="form-select form-select-sm"
               onChange={(e) => {
@@ -115,30 +126,29 @@ function LibroDiario() {
           </div>
         </div>
 
-        <table className="table table-bordered table-hover text-center">
+        <table className="table table-bordered table-hover">
           <thead className="table-light">
             <tr>
-              <th>Fecha</th>
-              <th>Código de Cuenta</th>
-              <th>Descripción</th>
-              <th>Tipo</th>
-              <th>Acción</th>
+              <th className="text-start">Fecha</th>
+              <th className="text-start">Código de Cuenta</th>
+              <th className="text-start">Descripción</th>
+              <th className="text-start">Tipo</th>
+              <th className="text-start">Acción</th>
             </tr>
           </thead>
           <tbody>
             {asientos
-              .filter((a) =>
-                a.descripcion.toLowerCase().includes(filtro.toLowerCase()) ||
-                a.tipoAsiento.toLowerCase().includes(filtro.toLowerCase()) ||
-                a.detalles?.[0]?.cuentaCodigo?.toLowerCase().includes(filtro.toLowerCase())
-              )
+              .filter((a) => {
+                const fechaFormateada = formatearFecha(a.fecha);
+                return fechaFormateada.includes(search);
+              })
               .map((asiento) => (
                 <tr key={asiento.id}>
-                  <td>{asiento.fecha}</td>
-                  <td>{asiento.detalles?.[0]?.cuentaCodigo || "N/D"}</td>
-                  <td>{asiento.descripcion}</td>
-                  <td>{asiento.tipoAsiento}</td>
-                  <td>
+                  <td className="text-start">{formatearFecha(asiento.fecha)}</td>
+                  <td className="text-start">{asiento.detalles?.[0]?.cuentaCodigo || "N/D"}</td>
+                  <td className="text-start">{asiento.descripcion}</td>
+                  <td className="text-start">{asiento.tipoAsiento}</td>
+                  <td className="text-start">
                     <button
                       className="btn btn-outline-secondary btn-sm me-1"
                       onClick={() => navigate(`/detalle-libro/${asiento.id}`)}

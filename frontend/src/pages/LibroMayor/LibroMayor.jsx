@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
+import {useState } from "react";
 import Navbar from "../../components/Navbar";
 import api from "../../api/axios";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
-
 
 const LibroMayor = () => {
   const [cuentas, setCuentas] = useState([]);
@@ -16,6 +13,14 @@ const LibroMayor = () => {
   const [sugerencias, setSugerencias] = useState([]);
   const [cuentaSeleccionada, setCuentaSeleccionada] = useState(null);
   const [mostrarTodas, setMostrarTodas] = useState(false);
+
+  const formatearFecha = (fechaISO) => {
+    const fecha = new Date(fechaISO);
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+  };
 
   const handleInputCodigo = (e) => {
     const valor = e.target.value;
@@ -52,50 +57,7 @@ const LibroMayor = () => {
         alert("No se pudo filtrar la cuenta.");
       });
   };
-  const exportFiltradoToExcel = () => {
-  if (filtrados.length === 0) {
-    alert("No hay movimientos para exportar.");
-    return;
-  }
 
-  const datos = filtrados.map((item, index) => ({
-    Nro: index + 1,
-    Fecha: item.fecha,
-    Descripción: item.descripcion,
-    Debe: parseFloat(item.debe || 0),
-    Haber: parseFloat(item.haber || 0),
-  }));
-
-  const hoja = XLSX.utils.json_to_sheet(datos);
-  const libro = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(libro, hoja, "LibroMayor");
-  const buffer = XLSX.write(libro, { bookType: "xlsx", type: "array" });
-  const blob = new Blob([buffer], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  });
-  saveAs(blob, `LibroMayor_${codigo}.xlsx`);
-};
-
-const exportFiltradoToXML = () => {
-  if (filtrados.length === 0) {
-    alert("No hay movimientos para exportar.");
-    return;
-  }
-
-  let xml = `<?xml version='1.0' encoding='UTF-8'?>\n<LibroMayor cuenta="${codigo}" nombre="${cuentaSeleccionada?.nombre || ''}">\n`;
-  filtrados.forEach((item) => {
-    xml += "  <Movimiento>\n";
-    xml += `    <Fecha>${item.fecha}</Fecha>\n`;
-    xml += `    <Descripcion>${item.descripcion}</Descripcion>\n`;
-    xml += `    <Debe>${item.debe}</Debe>\n`;
-    xml += `    <Haber>${item.haber}</Haber>\n`;
-    xml += "  </Movimiento>\n";
-  });
-  xml += "</LibroMayor>";
-
-  const blob = new Blob([xml], { type: "application/xml" });
-  saveAs(blob, `LibroMayor_${codigo}.xml`);
-};
   const buscarTodasLasCuentas = () => {
     const token = localStorage.getItem("auth_token");
     if (!desde || !hasta) {
@@ -106,7 +68,7 @@ const exportFiltradoToXML = () => {
     setMostrarTodas(true);
     api.get(`/libro-mayor/${periodoId}`, {
       headers: { Authorization: `Bearer ${token}` },
-      params: { desde, hasta } 
+      params: { desde, hasta }
     })
       .then(res => setCuentas(res.data))
       .catch(err => {
@@ -116,32 +78,32 @@ const exportFiltradoToXML = () => {
   };
 
   const renderTabla = (datos, totalDebe, totalHaber, saldo) => (
-    <table className="table table-bordered text-center align-middle">
+    <table className="table table-bordered text-start align-middle">
       <thead style={{ backgroundColor: "#d4ede1", fontWeight: "bold" }}>
         <tr>
-          <th>Fecha</th>
-          <th>Descripción</th>
-          <th>Debe</th>
-          <th>Haber</th>
+          <th className="text-start">Fecha</th>
+          <th className="text-start">Descripción</th>
+          <th className="text-start">Debe</th>
+          <th className="text-start">Haber</th>
         </tr>
       </thead>
       <tbody>
         {datos.map((r, i) => (
           <tr key={i}>
-            <td>{r.fecha}</td>
-            <td>{r.descripcion}</td>
-            <td>{r.debe?.toLocaleString() || 0}</td>
-            <td>{r.haber?.toLocaleString() || 0}</td>
+            <td className="text-start">{formatearFecha(r.fecha)}</td>
+            <td className="text-start">{r.descripcion}</td>
+            <td className="text-start">{r.debe?.toLocaleString() || 0}</td>
+            <td className="text-start">{r.haber?.toLocaleString() || 0}</td>
           </tr>
         ))}
         <tr style={{ backgroundColor: "#f8edc6", fontWeight: "bold" }}>
-          <td colSpan="2">Totales</td>
-          <td>{totalDebe.toLocaleString()}</td>
-          <td>{totalHaber.toLocaleString()}</td>
+          <td colSpan="2" className="text-start">Totales</td>
+          <td className="text-start">{totalDebe.toLocaleString()}</td>
+          <td className="text-start">{totalHaber.toLocaleString()}</td>
         </tr>
         <tr style={{ backgroundColor: "#d8f3f9", fontWeight: "bold" }}>
-          <td colSpan="3">Saldo</td>
-          <td style={{ color: saldo >= 0 ? "green" : "red" }}>
+          <td colSpan="3" className="text-start">Saldo</td>
+          <td className="text-start" style={{ color: saldo >= 0 ? "green" : "red" }}>
             {saldo.toLocaleString()}
           </td>
         </tr>
@@ -185,20 +147,24 @@ const exportFiltradoToXML = () => {
     <div className="d-flex">
       <Navbar />
       <div className="container py-4" style={{ marginLeft: "270px" }}>
-        <h4 className="mb-4">📗 Libro Mayor</h4>
+        <h2  className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>📗 Libro Mayor</h2>
 
-        {/* FILTRO */}
+        {/* FILTROS */}
         <div className="mb-4">
-          <h5>🔎 Filtros</h5>
+          
           <div className="row g-2 align-items-center">
             <div className="col-md-3 position-relative">
+               <div className="input-group">
+              <span className="input-group-text">🔍</span>
               <input
+              
                 type="text"
                 className="form-control"
                 placeholder="Código de cuenta"
                 value={codigo}
                 onChange={handleInputCodigo}
               />
+              </div>
               {sugerencias.length > 0 && (
                 <ul className="list-group position-absolute w-100 z-3">
                   {sugerencias.map((c) => (
@@ -242,18 +208,7 @@ const exportFiltradoToXML = () => {
             </div>
           </div>
         </div>
-      <div className="d-flex justify-content-end mb-3">
-  <select
-    className="form-select form-select-sm w-auto"
-    onChange={(e) => {
-      if (e.target.value === "excel") exportFiltradoToExcel();
-      if (e.target.value === "xml") exportFiltradoToXML();
-    }}
-  >
-    <option value="excel">Exportar a Excel</option>
-    <option value="xml">Exportar a XML</option>
-  </select>
-</div>
+
         {/* RESULTADOS */}
         {mostrarTodas ? renderTodas() : filtrados.length > 0 && renderFiltrada()}
       </div>

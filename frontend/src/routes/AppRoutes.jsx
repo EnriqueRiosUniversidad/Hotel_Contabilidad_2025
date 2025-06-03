@@ -1,4 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+  // src/routes/AppRoutes.jsx
+
+  import { Routes, Route, Navigate } from 'react-router-dom';
   import Login from '../pages/Login';
   import Home from '../pages/Home';
   import AgregarCuenta from '../pages/AgregarCuenta';
@@ -7,7 +9,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
   import AgregarLibro from '../pages/LibroDiario/AgregarLibro';
   import DetalleLibro from '../pages/LibroDiario/DetalleLibro';
 
- 
+import LibroMayor from '../pages/LibroMayor/LibroMayor';
+  
 
   import BalanceSYS from '../pages/BalanceSYS/BalanceSYS';
   import BalanceGeneral from '../pages/BalanceGeneral/BalanceGeneral';

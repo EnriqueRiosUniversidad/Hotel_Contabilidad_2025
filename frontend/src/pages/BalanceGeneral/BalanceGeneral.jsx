@@ -1,3 +1,4 @@
+// MODIFICADO para mostrar como tabla completa, con gráfico comparativo y selector de período
 import { useEffect, useState } from "react";
 import Navbar from "../../components/Navbar";
 import api from "../../api/axios";
@@ -13,9 +14,8 @@ const BalanceGeneral = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
-
     api.get(`/plancuentas/balance-general/${periodoId}`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => setRegistros(res.data))
       .catch((err) => {
@@ -24,11 +24,8 @@ const BalanceGeneral = () => {
       });
   }, [periodoId]);
 
-  const agruparPor = (tipo, subtipo) =>
-    registros.filter(r => r.tipo === tipo && r.subtipo === subtipo);
-
-  const totalPor = (tipo, subtipo) =>
-    agruparPor(tipo, subtipo).reduce((acc, r) => acc + r.monto, 0);
+  const agruparPor = (tipo) => registros.filter((r) => r.tipo === tipo);
+  const totalPorTipo = (tipo) => agruparPor(tipo).reduce((acc, r) => acc + r.monto, 0);
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(registros);
@@ -47,8 +44,8 @@ const BalanceGeneral = () => {
     doc.text("Balance General", 14, 15);
     doc.autoTable({
       startY: 25,
-      head: [["Cuenta", "Tipo", "Subtipo", "Monto"]],
-      body: registros.map(item => [item.cuenta, item.tipo, item.subtipo, item.monto.toLocaleString()]),
+      head: [["Cuenta", "Monto"]],
+      body: registros.map(item => [item.cuenta, item.monto.toLocaleString()]),
       styles: { fontSize: 8 },
       theme: "grid"
     });
@@ -72,9 +69,9 @@ const BalanceGeneral = () => {
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container py-3" style={{ marginLeft: "270px" }}>
+      <div className="container-fluid py-3" style={{ marginLeft: "270px" }}>
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h4 className="mb-3">Balance General</h4>
+          <h2 className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>Balance General</h2>
           <div className="d-inline-flex gap-3 align-items-center">
             <div>
               <label htmlFor="periodo" className="form-label">Seleccionar Período Contable</label>
@@ -99,87 +96,84 @@ const BalanceGeneral = () => {
               >
                 <option value="">Exportar</option>
                 <option value="excel">Exportar a Excel</option>
-                <option value="pdf">Exportar a PDF</option>
                 <option value="xml">Exportar a XML</option>
               </select>
             </div>
           </div>
         </div>
 
-        <div className="table-responsive mt-3">
-          <table className="table table-bordered text-center align-middle">
-            <thead className="table-success">
-              <tr>
-                <th>Cuenta</th><th>Monto</th>
-                <th>Cuenta</th><th>Monto</th>
-                <th>Patrimonio Neto</th><th>Monto</th>
+        <table className="table table-bordered w-100">
+          <thead className="text-center table-success">
+            <tr>
+              <th>Cuenta</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colSpan="2" className="fw-bold table-success">Activos</td></tr>
+            {agruparPor("ACTIVO").map((item, index) => (
+              <tr key={index}>
+                <td>{item.cuenta}</td>
+                <td className="text-end">{item.monto.toLocaleString()}</td>
               </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: Math.max(
-                agruparPor("ACTIVO", "CIRCULANTE").length,
-                agruparPor("PASIVO", "CIRCULANTE").length,
-                agruparPor("PATRIMONIO", "NO_CLASIFICADO").length
-              ) }).map((_, i) => (
-                <tr key={`row-circulante-${i}`}>
-                  <td>{agruparPor("ACTIVO", "CIRCULANTE")[i]?.cuenta || ''}</td>
-                  <td>{agruparPor("ACTIVO", "CIRCULANTE")[i]?.monto.toLocaleString() || ''}</td>
-                  <td>{agruparPor("PASIVO", "CIRCULANTE")[i]?.cuenta || ''}</td>
-                  <td>{agruparPor("PASIVO", "CIRCULANTE")[i]?.monto.toLocaleString() || ''}</td>
-                  <td>{agruparPor("PATRIMONIO", "NO_CLASIFICADO")[i]?.cuenta || ''}</td>
-                  <td>{agruparPor("PATRIMONIO", "NO_CLASIFICADO")[i]?.monto.toLocaleString() || ''}</td>
-                </tr>
-              ))}
-              <tr>
-                <td><strong>Total Activo Circulante</strong></td>
-                <td>{totalPor("ACTIVO", "CIRCULANTE").toLocaleString()}</td>
-                <td><strong>Total Pasivo Circulante</strong></td>
-                <td>{totalPor("PASIVO", "CIRCULANTE").toLocaleString()}</td>
-                <td><strong>Total Patrimonio Neto</strong></td>
-                <td>{totalPor("PATRIMONIO", "NO_CLASIFICADO").toLocaleString()}</td>
-              </tr>
+            ))}
+            <tr className="fw-bold table-info">
+              <td>Total Activo</td>
+              <td className="text-end">{totalPorTipo("ACTIVO").toLocaleString()}</td>
+            </tr>
 
-              {agruparPor("ACTIVO", "NO_CIRCULANTE").map((r, i) => (
-                <tr key={`anc-${i}`}>
-                  <td>{r.cuenta}</td><td>{r.monto.toLocaleString()}</td>
-                  <td colSpan="4"></td>
-                </tr>
-              ))}
-
-              <tr>
-                <td><strong>Total Activo No Circulante</strong></td>
-                <td>{totalPor("ACTIVO", "NO_CIRCULANTE").toLocaleString()}</td>
-                <td colSpan="4"></td>
+            <tr><td colSpan="2" className="fw-bold table-success">Pasivo</td></tr>
+            {agruparPor("PASIVO").map((item, index) => (
+              <tr key={index}>
+                <td>{item.cuenta}</td>
+                <td className="text-end">{item.monto.toLocaleString()}</td>
               </tr>
+            ))}
+            <tr className="fw-bold table-info">
+              <td>Total Pasivo</td>
+              <td className="text-end">{totalPorTipo("PASIVO").toLocaleString()}</td>
+            </tr>
 
-              <tr className="table-success">
-                <td><strong>Total Activo</strong></td>
-                <td><strong>{(
-                  totalPor("ACTIVO", "CIRCULANTE") +
-                  totalPor("ACTIVO", "NO_CIRCULANTE")
-                ).toLocaleString()}</strong></td>
-                <td colSpan="4"></td>
+            <tr><td colSpan="2" className="fw-bold table-success">Patrimonio Neto</td></tr>
+            {agruparPor("PATRIMONIO").map((item, index) => (
+              <tr key={index}>
+                <td>{item.cuenta}</td>
+                <td className="text-end">{item.monto.toLocaleString()}</td>
               </tr>
+            ))}
+            <tr className="fw-bold table-info">
+              <td>Total Patrimonio Neto</td>
+              <td className="text-end">{totalPorTipo("PATRIMONIO").toLocaleString()}</td>
+            </tr>
+            <tr className="fw-bold table-info">
+              <td>Total Pasivo y Patrimonio Neto</td>
+              <td className="text-end">{(totalPorTipo("PATRIMONIO") + totalPorTipo("PASIVO")).toLocaleString()}</td>
+            </tr>
+          </tbody>
+        </table>
 
-              <tr>
-                <td colSpan="2"></td>
-                <td><strong>Total Pasivo No Circulante</strong></td>
-                <td>{totalPor("PASIVO", "NO_CIRCULANTE").toLocaleString()}</td>
-                <td></td>
-                <td></td>
-              </tr>
-
-              <tr className="table-success">
-                <td colSpan="4"></td>
-                <td><strong>Total Pasivo y Patrimonio Neto</strong></td>
-                <td><strong>{(
-                  totalPor("PASIVO", "CIRCULANTE") +
-                  totalPor("PASIVO", "NO_CIRCULANTE") +
-                  totalPor("PATRIMONIO", "NO_CLASIFICADO")
-                ).toLocaleString()}</strong></td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="mt-5 mb-4 d-flex justify-content-center">
+          <div style={{ width: "500px" }}>
+            <h5 className="text-center">Comparativo de Activo vs Pasivo y Patrimonio Neto</h5>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart
+                data={[
+                  { nombre: 'Activo', monto: totalPorTipo("ACTIVO") },
+                  { nombre: 'Pasivo', monto: totalPorTipo("PASIVO") },
+                  { nombre: 'Patrimonio Neto', monto: totalPorTipo("PATRIMONIO") },
+                ]}
+                margin={{ top: 10, right: 40, left: 3, bottom: 1 }}
+                barCategoryGap={50}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="nombre" />
+                <YAxis tickFormatter={(value) => value.toLocaleString()} />
+                <Tooltip formatter={(value) => `${value.toLocaleString()} Gs`} />
+                <Legend />
+                <Bar dataKey="monto" name="Monto" fill="#158550" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
         <div className="mt-5 mb-4 d-flex justify-content-center">
   <div style={{ width: "600px" }}>
