@@ -180,7 +180,7 @@ function AgregarCuenta() {
   return (
     <div className="d-flex">
       <Navbar />
-      <div className="container mt-4" style={{ marginLeft: '250px' }}>
+      <div className="container mt-4" style={{ marginLeft: '270px' }}>
         <h2 className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>{seleccionada ? 'Editar Cuenta' : 'Agregar Cuenta Contable'}</h2>
 
         <div className="mb-4 d-flex align-items-end gap-3">

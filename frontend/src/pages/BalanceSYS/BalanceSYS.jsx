@@ -139,7 +139,6 @@ const BalanceSYS = () => {
               }}>
                 <option value="">Exportar</option>
                 <option value="excel">Excel</option>
-                <option value="pdf">PDF</option>
                 <option value="xml">XML</option>
               </select>
               <button type="button" className="btn btn-link" onClick={() => setMostrarReporte(!mostrarReporte)}>Ver Gráfico</button>
