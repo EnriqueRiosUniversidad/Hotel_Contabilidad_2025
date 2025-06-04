@@ -1,6 +1,7 @@
     package com.hotel.backend.controllers;
 
     import com.hotel.backend.DTOs.CuentaBalanceDTO;
+    import com.hotel.backend.DTOs.CuentaBalanceTreeDTO;
     import com.hotel.backend.DTOs.CuentaContableDTO;
     import com.hotel.backend.DTOs.PeriodoContableDTO;
     import com.hotel.backend.entities.EstadoPeriodo;
@@ -65,6 +66,13 @@
         public ResponseEntity<List<CuentaBalanceDTO>> obtenerBalance(@PathVariable Integer periodoId) {
             return ResponseEntity.ok(cuentaService.obtenerBalanceGeneral(periodoId));
         }
+
+        //Version actualizada
+        @GetMapping("/balance-general/tree/{periodoId}")
+        public ResponseEntity<List<CuentaBalanceTreeDTO>> getBalanceGeneralTree(@PathVariable Integer periodoId) {
+            return ResponseEntity.ok(cuentaService.getBalanceGeneralTree(periodoId));
+        }
+
 
 
         @PostMapping("/copiar-cuentas")

@@ -1,11 +1,13 @@
 package com.hotel.backend.services;
 
 import com.hotel.backend.DTOs.CuentaBalanceDTO;
+import com.hotel.backend.DTOs.CuentaBalanceTreeDTO;
 import com.hotel.backend.DTOs.CuentaContableDTO;
 import com.hotel.backend.DTOs.PeriodoContableDTO;
 import com.hotel.backend.entities.*;
 import com.hotel.backend.repository.CuentasContables_Repository;
 import com.hotel.backend.repository.DetalleAsientoRepository;
+import com.hotel.backend.repository.AsientoContableRepository;
 import com.hotel.backend.repository.PeriodoContable_Repository;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,10 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +30,7 @@ public class Cuenta_Service {
     private final CuentasContables_Repository cuentasContables_Repository;
 
     private final DetalleAsientoRepository detalleAsientoRepository;
+    private final AsientoContableRepository asientoContableRepository;
     private final ModelMapper mapper = new ModelMapper();
 
     private final PeriodoContable_Repository periodoContable_Repository;
@@ -232,6 +232,69 @@ public class Cuenta_Service {
     }
 
 
+
+//Metodo para el Balance General.
+public List<CuentaBalanceTreeDTO> getBalanceGeneralTree(Integer periodoId) {
+    List<CuentaContable> cuentas = cuentasContables_Repository.findById_PeriodoContableId(periodoId);
+    Map<String, CuentaBalanceTreeDTO> map = new HashMap<>();
+
+    for (CuentaContable c : cuentas) {
+        CuentaBalanceTreeDTO dto = new CuentaBalanceTreeDTO();
+        dto.setCodigo(c.getId().getCodigo());
+        dto.setNombre(c.getNombre());
+        dto.setDebe(0.0);
+        dto.setHaber(0.0);
+        dto.setSaldo(0.0);
+        map.put(dto.getCodigo(), dto);
+    }
+
+    List<Object[]> movimientos = asientoContableRepository.sumDebeHaberPorCuenta(periodoId);
+    for (Object[] row : movimientos) {
+        String codigo = (String) row[0];
+        Double debe = (Double) row[1];
+        Double haber = (Double) row[2];
+        CuentaBalanceTreeDTO dto = map.get(codigo);
+        if (dto != null) {
+            dto.setDebe(debe);
+            dto.setHaber(haber);
+            dto.setSaldo(debe - haber);
+        }
+    }
+
+    // construir jerarquía
+    List<CuentaBalanceTreeDTO> raiz = new ArrayList<>();
+    for (CuentaBalanceTreeDTO dto : map.values()) {
+        String[] partes = dto.getCodigo().split("\\.");
+        if (partes.length == 1) {
+            raiz.add(dto);
+        } else {
+            String padreCodigo = String.join(".", Arrays.copyOf(partes, partes.length - 1));
+            CuentaBalanceTreeDTO padre = map.get(padreCodigo);
+            if (padre != null) {
+                padre.getHijos().add(dto);
+            } else {
+                raiz.add(dto);
+            }
+        }
+    }
+
+    // ✅ sumar totales de hijos en padres
+    for (CuentaBalanceTreeDTO dto : raiz) {
+        acumularTotales(dto);
+    }
+
+    return raiz;
+}
+
+    // función auxiliar
+    private void acumularTotales(CuentaBalanceTreeDTO cuenta) {
+        for (CuentaBalanceTreeDTO hijo : cuenta.getHijos()) {
+            acumularTotales(hijo);
+            cuenta.setDebe(cuenta.getDebe() + hijo.getDebe());
+            cuenta.setHaber(cuenta.getHaber() + hijo.getHaber());
+            cuenta.setSaldo(cuenta.getSaldo() + hijo.getSaldo());
+        }
+    }
 
 
 }

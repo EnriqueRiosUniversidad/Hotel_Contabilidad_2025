@@ -1,0 +1,42 @@
+[33mf2f5538[m[33m ([m[1;31morigin/frontend-Cele[m[33m)[m Pantallas terminadas: balance General, Balance de suma y Saldo y balance de resultado y agregar cuenta
+[33m07c36fa[m Actualización final de las pantallas libro Diario y Mayor, balance de Resultados y de sumas y saldos y de agregar cuenta
+[33m901dc15[m Actutualizado
+[33m575f598[m Actualizacion backend Enrique
+[33m7037414[m Actualizacion del home
+[33m696d0b9[m Pantalla Balance suma y saldo y de resultado
+[33ma34cf55[m Actualizado
+[33m1be9d80[m Actualización
+[33m9b95e0c[m login-home
+[33ma36dbcf[m actualizacion login
+[33m8e28d33[m puesta en marcha backend de libro diario
+[33m140afae[m m
+[33m82172bd[m Merge branch 'backend'
+[33mbd1e622[m Merge branch 'temp-fix' into backend
+[33m35c8a78[m Union paginas libro diario y backend
+[33m1b7ea1b[m Merge branch 'temp-fix' of github.com:EnriqueRiosUniversidad/Hotel_Contabilidad_2025 into temp-fix import { useLocation, useNavigate } from "react-router-dom"; import * as XLSX from "xlsx"; import { saveAs } from "file-saver"; import jsPDF from "jspdf"; import "jspdf-autotable"; import Navbar from '../../components/Navbar'; // Ajusta la ruta si tu Navbar.jsx está en otra carpeta
+[33mad0c779[m pruebas
+[33md0c167c[m mejora add cuenta
+[33mdb92480[m[33m ([m[1;31morigin/front_Cele[m[33m, [m[1;32mfront_Cele[m[33m)[m Libro diario
+[33mcecdb33[m necesito pasar cambios a mi pc
+[33m55d4ec2[m correccion application.properties
+[33md312dc4[m Merge pull request #4 from EnriqueRiosUniversidad/temp-fix
+[33m88a4a31[m correccion application.properties
+[33m3cfd4c5[m Merge pull request #3 from EnriqueRiosUniversidad/temp-fix
+[33md0a5d97[m se agrego el eliminar
+[33m5ae9440[m bueno, mejoramos el frontend y el backend en cuentas y jerarquia
+[33m2a99756[m ultimas update tabla plan de cuentas
+[33mba4a123[m y asi
+[33m1571579[m porfin login funcionando
+[33m16e723f[m esta funcionando
+[33m33fca03[m prueba para deply
+[33mc5bba3e[m prueba temporal
+[33ma026c9a[m Merge pull request #1 from EnriqueRiosUniversidad/backend
+[33mb4ff1ec[m 💬actual
+[33m310e024[m ejoras para desplegar
+[33m83e48f0[m Spring security basico y base de datos bien implementada
+[33ma242864[m agregue la conexion a la base de datos
+[33m7003aeb[m Endpoint cuentas
+[33m97c56db[m Cele
+[33m23299ef[m conexion local a base de datos, y scrip para datos fake de prueba
+[33m6021302[m Inicializando el frontend con React y DaisyUI
+[33mad68cca[m Inicializando el backend con Spring Boot
