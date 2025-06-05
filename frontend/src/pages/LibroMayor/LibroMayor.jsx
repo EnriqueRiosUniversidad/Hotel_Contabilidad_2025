@@ -1,6 +1,8 @@
-import {useState } from "react";
+import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import api from "../../api/axios";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const LibroMayor = () => {
   const [cuentas, setCuentas] = useState([]);
@@ -77,6 +79,60 @@ const LibroMayor = () => {
       });
   };
 
+  const exportToExcel = () => {
+    const datos = mostrarTodas ? cuentas.flatMap((c) =>
+      (c.movimientos || []).map(m => ({
+        cuenta: `${c.cuentaCodigo.codigo} - ${c.cuentaNombre}`,
+        ...m
+      }))
+    ) : filtrados.map(m => ({
+      cuenta: `${codigo} - ${cuentaSeleccionada?.nombre || ""}`,
+      ...m
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(datos);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "LibroMayor");
+    const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, "LibroMayor.xlsx");
+  };
+
+  const exportToXML = () => {
+    const datos = mostrarTodas ? cuentas : filtrados;
+    let xml = "<?xml version='1.0' encoding='UTF-8'?>\n<LibroMayor>\n";
+
+    if (mostrarTodas) {
+      datos.forEach((cuenta) => {
+        xml += `  <Cuenta codigo="${cuenta.cuentaCodigo.codigo}" nombre="${cuenta.cuentaNombre}">\n`;
+        cuenta.movimientos?.forEach((m) => {
+          xml += `    <Movimiento>\n`;
+          Object.entries(m).forEach(([k, v]) => {
+            xml += `      <${k}>${v}</${k}>\n`;
+          });
+          xml += `    </Movimiento>\n`;
+        });
+        xml += `  </Cuenta>\n`;
+      });
+    } else {
+      xml += `  <Cuenta codigo="${codigo}" nombre="${cuentaSeleccionada?.nombre || ""}">\n`;
+      datos.forEach((m) => {
+        xml += `    <Movimiento>\n`;
+        Object.entries(m).forEach(([k, v]) => {
+          xml += `      <${k}>${v}</${k}>\n`;
+        });
+        xml += `    </Movimiento>\n`;
+      });
+      xml += `  </Cuenta>\n`;
+    }
+
+    xml += "</LibroMayor>";
+    const blob = new Blob([xml], { type: "application/xml" });
+    saveAs(blob, "LibroMayor.xml");
+  };
+
   const renderTabla = (datos, totalDebe, totalHaber, saldo) => (
     <table className="table table-bordered text-start align-middle">
       <thead style={{ backgroundColor: "#d4ede1", fontWeight: "bold" }}>
@@ -147,23 +203,23 @@ const LibroMayor = () => {
     <div className="d-flex">
       <Navbar />
       <div className="container py-4" style={{ marginLeft: "270px" }}>
-        <h2  className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>📗 Libro Mayor</h2>
+        <h2 className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>
+          📗 Libro Mayor
+        </h2>
 
         {/* FILTROS */}
         <div className="mb-4">
-          
           <div className="row g-2 align-items-center">
             <div className="col-md-3 position-relative">
-               <div className="input-group">
-              <span className="input-group-text">🔍</span>
-              <input
-              
-                type="text"
-                className="form-control"
-                placeholder="Código de cuenta"
-                value={codigo}
-                onChange={handleInputCodigo}
-              />
+              <div className="input-group">
+                <span className="input-group-text">🔍</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Código de cuenta"
+                  value={codigo}
+                  onChange={handleInputCodigo}
+                />
               </div>
               {sugerencias.length > 0 && (
                 <ul className="list-group position-absolute w-100 z-3">
@@ -207,6 +263,21 @@ const LibroMayor = () => {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Exportar */}
+        <div className="mb-4 text-end">
+          <select
+            className="form-select form-select-sm w-auto d-inline-block"
+            onChange={(e) => {
+              if (e.target.value === "excel") exportToExcel();
+              if (e.target.value === "xml") exportToXML();
+            }}
+          >
+            <option value="">Exportar</option>
+            <option value="excel">Excel</option>
+            <option value="xml">XML</option>
+          </select>
         </div>
 
         {/* RESULTADOS */}

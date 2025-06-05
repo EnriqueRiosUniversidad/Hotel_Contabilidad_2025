@@ -24,9 +24,29 @@ public class AsientoContableService {
     public List<AsientoContableDTO> listarPorPeriodo(Integer periodoId) {
         return asientoRepo.findByPeriodo_PeriodoId(periodoId)
                 .stream()
-                .map(a -> mapper.map(a, AsientoContableDTO.class))
+                .map(asiento -> {
+                    AsientoContableDTO dto = new AsientoContableDTO();
+                    dto.setId(asiento.getId());
+                    dto.setDescripcion(asiento.getDescripcion());
+                    dto.setFecha(asiento.getFecha());
+                    dto.setTipoAsiento(asiento.getTipoAsiento());
+                    dto.setPeriodoId(asiento.getPeriodo().getPeriodoId());
+
+                    List<DetalleAsientoDTO> detalles = asiento.getDetalles().stream().map(detalle -> {
+                        DetalleAsientoDTO d = new DetalleAsientoDTO();
+                        d.setCuentaCodigo(detalle.getCuenta().getId().getCodigo());
+                        d.setCuentaPeriodoContableId(detalle.getCuenta().getPeriodoContable().getPeriodoId());
+                        d.setDebe(detalle.getDebe());
+                        d.setHaber(detalle.getHaber());
+                        return d;
+                    }).toList();
+
+                    dto.setDetalles(detalles);
+                    return dto;
+                })
                 .toList();
     }
+
 
     public AsientoContableDTO crear(AsientoContableDTO dto) {
         PeriodoContable periodo = periodoRepo.findById(dto.getPeriodoId())
