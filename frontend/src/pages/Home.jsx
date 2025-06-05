@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import api from '../api/axios';
 import { getToken } from '../utils/auth';
+import BalanceResumenChart from "../components/BalanceResumenChart";
+import PieChartBalance from "../components/PieChartBalance";
 
 function Home() {
   const [periodoId, setPeriodoId] = useState(() => localStorage.getItem("periodoId") || "1");
@@ -63,11 +65,31 @@ function Home() {
   }, [periodoId]);
 
   return (
-    <div className="d-flex">
+    <div
+      className="d-flex"
+      style={{
+        backgroundImage: "url('/fondo2.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        width: "100%"
+      }}
+    >
       <Navbar />
-      <div className="flex-grow-1 p-4" style={{ marginLeft: "250px" }}>
-        <h1>Bienvenido al Sistema Contable</h1>
-        <p>Aquí puedes gestionar tus libros, balances y más.</p>
+      <div
+        className="flex-grow-1 p-4"
+        style={{
+          marginLeft: "270px",
+          backgroundColor: "rgba(255, 255, 255, 0.85)",
+          borderRadius: "12px",
+          padding: "20px",
+          width: "100%",
+        }}
+      >
+        <h1 className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>
+          Bienvenido al Sistema Contable
+        </h1>
+        <p className="text-center">Aquí puedes gestionar tus libros, balances y más.</p>
 
         <div className="mt-4">
           <label htmlFor="periodo" className="form-label">Seleccionar Período Contable</label>
@@ -83,6 +105,11 @@ function Home() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="d-flex gap-4 mt-5 flex-wrap justify-content-center">
+          <BalanceResumenChart />
+          <PieChartBalance />
         </div>
       </div>
     </div>

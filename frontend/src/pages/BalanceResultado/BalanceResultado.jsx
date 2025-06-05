@@ -47,7 +47,7 @@ const BalanceResultado = () => {
   };
 
   const exportToExcel = () => {
-    const headers = ["cuenta", "monto"];
+    const headers = ["Cuenta", "Monto"];
     const data = registros.map(r => [r.cuenta, r.monto || 0]);
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
     const workbook = XLSX.utils.book_new();
@@ -103,8 +103,6 @@ const BalanceResultado = () => {
           <h2 className="text-center text-success fw-bold" style={{ fontFamily: "Georgia, serif" }}>Balance de Resultado</h2>
           <div className="d-inline-flex gap-3 align-items-center">
             <div>
-            </div>
-            <div>
               <select className="form-select form-select-sm" onChange={(e) => {
                 const value = e.target.value;
                 if (value === "excel") exportToExcel();
@@ -123,17 +121,17 @@ const BalanceResultado = () => {
 
         {mostrarReporte && <div className="mb-4"><Bar data={chartData} /></div>}
 
-        <table className="table table-bordered align-middle text-start">
+        <table className="table table-bordered align-middle text-end">
           <thead className="table-secondary">
             <tr>
-              <th>CUENTA</th>
+              <th className="text-start">CUENTA</th>
               <th>MONTO</th>
             </tr>
           </thead>
           <tbody>
             {registros.map((item, i) => (
               <tr key={i} className={getRowClass(item.tipo)}>
-                <td>{item.cuenta}</td>
+                <td className="text-start">{item.cuenta}</td>
                 <td>{formatMonto(item.monto)}</td>
               </tr>
             ))}

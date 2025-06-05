@@ -148,11 +148,11 @@ const BalanceSYS = () => {
 
         {mostrarReporte && <div className="mb-4"><Bar data={chartData} /></div>}
 
-        <table className="table table-bordered text-start align-middle">
+        <table className="table table-bordered text-end align-middle">
           <thead className="table-success">
             <tr>
-              <th>#</th>
-              <th>CUENTA</th>
+              <th className="text-start">#</th>
+              <th className="text-start">CUENTA</th>
               <th>Debe</th>
               <th>Haber</th>
               <th>Saldo Debe</th>
@@ -162,8 +162,8 @@ const BalanceSYS = () => {
           <tbody>
             {registros.map((item, i) => (
               <tr key={i}>
-                <td>{i + 1}</td>
-                <td>{item.cuenta}</td>
+                <td className="text-start">{i + 1}</td>
+                <td className="text-start">{item.cuenta}</td>
                 <td>{formatNumber(item.debe || 0)}</td>
                 <td>{formatNumber(item.haber || 0)}</td>
                 <td>{formatNumber(item.saldoDebe || 0)}</td>

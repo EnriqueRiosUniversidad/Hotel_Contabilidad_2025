@@ -9,7 +9,7 @@
   import AgregarLibro from '../pages/LibroDiario/AgregarLibro';
   import DetalleLibro from '../pages/LibroDiario/DetalleLibro';
 
-import LibroMayor from '../pages/LibroMayor/LibroMayor';
+  import LibroMayor from '../pages/LibroMayor/LibroMayor';
   
 
   import BalanceSYS from '../pages/BalanceSYS/BalanceSYS';
