@@ -26,6 +26,10 @@ const BalanceGeneral = () => {
 
   const agruparPor = (tipo) => registros.filter((r) => r.tipo === tipo);
   const totalPorTipo = (tipo) => agruparPor(tipo).reduce((acc, r) => acc + r.monto, 0);
+  const totalPor = (tipo, clasificacion) =>
+  registros
+    .filter((r) => r.tipo === tipo && r.clasificacion === clasificacion)
+    .reduce((acc, r) => acc + r.monto, 0);
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(registros);

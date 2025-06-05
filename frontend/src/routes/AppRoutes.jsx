@@ -9,14 +9,13 @@
   import AgregarLibro from '../pages/LibroDiario/AgregarLibro';
   import DetalleLibro from '../pages/LibroDiario/DetalleLibro';
 
-import LibroMayor from '../pages/LibroMayor/LibroMayor';
+  import LibroMayor from '../pages/LibroMayor/LibroMayor';
   
 
   import BalanceSYS from '../pages/BalanceSYS/BalanceSYS';
   import BalanceGeneral from '../pages/BalanceGeneral/BalanceGeneral';
   import BalanceResultado from '../pages/BalanceResultado/BalanceResultado';
   import { isTokenValid } from '../utils/auth';
-  import LibroMayor from '../pages/LibroMayor/LibroMayor';
 
 
 

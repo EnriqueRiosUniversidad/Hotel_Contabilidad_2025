@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import api from '../api/axios';
 import { getToken } from '../utils/auth';
+import BalanceResumenChart from "../components/BalanceResumenChart";
+import PieChartBalance from "../components/PieChartBalance";
+
 
 function Home() {
   const [periodoId, setPeriodoId] = useState(() => localStorage.getItem("periodoId") || "1");
@@ -87,11 +90,11 @@ function Home() {
 
         {/* Dashboard visual de ingresos vs egresos, flujo y compras */}
         <div className="d-flex gap-4 mt-5 flex-wrap">
-          <DashboardIngresosEgresos />
-          <DashboardFlujoCaja />
+           <BalanceResumenChart/>
+           <PieChartBalance />
+          </div>
         </div>
       </div>
-    </div>
   );
 }
 
